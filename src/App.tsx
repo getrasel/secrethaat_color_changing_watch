@@ -23,7 +23,6 @@ import {
   LuMoonStar,
   LuBatteryCharging,
   LuPalette,
-  LuSparkles,
   LuZap,
   LuCable,
   LuEye,
