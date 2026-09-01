@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+:root {
+  --font-bn: 'Noto Sans Bengali', system-ui, -apple-system, sans-serif;
+  --font-en: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-num: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  
+  --accent-cyan: #0284C7;
+  --accent-sky: #38BDF8;
+  --accent-blue: #2563EB;
+}
+
+html {
+  scroll-behavior: smooth;
+  color: #0F172A;
+  -webkit-tap-highlight-color: transparent;
+  background-color: #F8FAFC;
+  font-family: var(--font-bn);
+}
+
+body {
+  background-color: #F8FAFC;
+  background-image: 
+    radial-gradient(120% 50% at 50% 0, #E0F2FE 0%, #F0F9FF 35%, rgba(240, 249, 255, 0) 100%),
+    linear-gradient(#F0F9FF 0%, #F8FAFC 250px, #FFFFFF 600px, #F8FAFC 1200px, #F1F5F9 2000px, #FFFFFF 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+.font-num, .font-en {
+  font-family: var(--font-en);
+}
+
+.font-bn {
+  font-family: var(--font-bn);
+}
+
+/* Frosted Sticky Navigation */
+.frosted-menu {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Premium Light Mode Card */
+.infracorp-card, .light-card {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.infracorp-card:hover, .light-card:hover {
+  background: #FFFFFF;
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 12px 32px -4px rgba(2, 132, 199, 0.1), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Soft Ambient Glow in Light Mode */
+.eclipse-orb {
+  pointer-events: none;
+  background: radial-gradient(circle at 45% 45%, rgba(186, 230, 253, 0.5) 0%, rgba(224, 242, 254, 0.2) 60%, rgba(240, 249, 255, 0) 100%);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+/* Accent Divider Line */
+.small-design-line {
+  background: linear-gradient(90deg, transparent 0%, rgba(2, 132, 199, 0.2) 15%, #0284C7 50%, rgba(2, 132, 199, 0.2) 85%, transparent 100%);
+  border-radius: 9999px;
+  width: 80px;
+  height: 2px;
+  margin: 0.85rem auto 1.5rem;
+  box-shadow: 0 0 12px 1px rgba(2, 132, 199, 0.2);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0284C7;
+}
+
+/* Safe bottom for mobile */
+.safe-bottom {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
