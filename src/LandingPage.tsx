@@ -45,7 +45,7 @@ export default function LandingPage() {
     address: '',
     variant: 'স্পেস ব্লু (Space Blue)',
     quantity: 1,
-    deliveryZone: 'dhaka_inside' // 'dhaka_inside' (70) or 'dhaka_outside' (130)
+    deliveryZone: 'dhaka_outside' // 'dhaka_outside' (130) or 'dhaka_inside' (70)
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
@@ -934,23 +934,6 @@ export default function LandingPage() {
                   <span>ডেলিভারি এলাকা নির্বাচন করুন</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className={`p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_inside'
-                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-slate-50 border-slate-200 text-[#475569]'
-                    }`}>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="deliveryZone"
-                        checked={orderForm.deliveryZone === 'dhaka_inside'}
-                        onChange={() => setOrderForm({ ...orderForm, deliveryZone: 'dhaka_inside' })}
-                        className="accent-[#0284C7]"
-                      />
-                      <span className="font-semibold text-sm">ঢাকা সিটির ভিতরে</span>
-                    </div>
-                    <span className="font-num font-bold text-[#0284C7]">৳ ৭০</span>
-                  </label>
-
                   <label className={`p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_outside'
                     ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
                     : 'bg-slate-50 border-slate-200 text-[#475569]'
@@ -966,6 +949,23 @@ export default function LandingPage() {
                       <span className="font-semibold text-sm">ঢাকা সিটির বাইরে</span>
                     </div>
                     <span className="font-num font-bold text-[#0284C7]">৳ ১৩০</span>
+                  </label>
+
+                  <label className={`p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_inside'
+                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
+                    : 'bg-slate-50 border-slate-200 text-[#475569]'
+                    }`}>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="deliveryZone"
+                        checked={orderForm.deliveryZone === 'dhaka_inside'}
+                        onChange={() => setOrderForm({ ...orderForm, deliveryZone: 'dhaka_inside' })}
+                        className="accent-[#0284C7]"
+                      />
+                      <span className="font-semibold text-sm">ঢাকা সিটির ভিতরে</span>
+                    </div>
+                    <span className="font-num font-bold text-[#0284C7]">৳ ৭০</span>
                   </label>
                 </div>
               </div>
@@ -1178,28 +1178,18 @@ export default function LandingPage() {
 
 
       {/* ==================================================
-          FLOATING SCROLL TO TOP & WHATSAPP BUTTONS
+          FLOATING SCROLL TO TOP BUTTON
           ================================================== */}
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-36 md:bottom-24 right-4 sm:right-6 z-50 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white hover:bg-slate-50 text-[#0284C7] border border-slate-200 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer group animate-in fade-in"
+          className="fixed bottom-36 md:bottom-24 right-4 sm:right-6 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white hover:bg-slate-50 text-[#0284C7] border border-slate-200 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer group animate-in fade-in"
           aria-label="উপরে চলে যান"
           title="উপরে চলে যান"
         >
           <LuArrowUp size={20} className="group-hover:-translate-y-0.5 transition-transform" />
         </button>
       )}
-
-      <a
-        href="https://wa.me/8801746867350?text=Hello%2C%20I%20want%20to%20know%20about%20Astronaut%20Reading%20Lamp"
-        target="_blank"
-        rel="noreferrer"
-        className="fixed bottom-20 md:bottom-8 right-4 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#16a34a] hover:bg-[#15803d] text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all cursor-pointer group"
-        aria-label="হোয়াটসঅ্যাপে যোগাযোগ করুন"
-      >
-        <FaWhatsapp className="text-2xl sm:text-3xl group-hover:rotate-12 transition-transform duration-300" />
-      </a>
 
 
       {/* ==================================================

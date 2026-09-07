@@ -34,13 +34,17 @@ export const ThankYou: React.FC = () => {
   const orderNumber = state?.orderNumber || fallbackOrderNumber;
 
   const order = state?.order;
+  const isOutside =
+    order?.deliveryArea === "outside" ||
+    order?.deliveryArea === "dhaka_outside" ||
+    state?.deliveryFee === PRODUCT_INFO.deliveryOutside;
   const grandTotal =
-    state?.grandTotal ?? PRODUCT_INFO.basePrice + PRODUCT_INFO.deliveryDhaka;
+    state?.grandTotal ??
+    PRODUCT_INFO.basePrice +
+      (isOutside ? PRODUCT_INFO.deliveryOutside : PRODUCT_INFO.deliveryDhaka);
   const deliveryFee =
     state?.deliveryFee ??
-    (order?.deliveryArea === "outside"
-      ? PRODUCT_INFO.deliveryOutside
-      : PRODUCT_INFO.deliveryDhaka);
+    (isOutside ? PRODUCT_INFO.deliveryOutside : PRODUCT_INFO.deliveryDhaka);
   const quantity = order?.quantity ?? 1;
   const unitPrice = PRODUCT_INFO.basePrice;
   const subtotal = state?.subtotal ?? unitPrice * quantity;
@@ -198,7 +202,7 @@ export const ThankYou: React.FC = () => {
               <div className="flex justify-between items-center gap-2 text-slate-600">
                 <span>
                   ডেলিভারি চার্জ (
-                  {order?.deliveryArea === "outside"
+                  {isOutside
                     ? "ঢাকার বাইরে"
                     : "ঢাকা ভেতরে"}
                   ):

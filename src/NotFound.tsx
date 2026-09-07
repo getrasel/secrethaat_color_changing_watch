@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { LuHouse, LuSearchX } from 'react-icons/lu';
-import { FaWhatsapp } from 'react-icons/fa6';
 
 export default function NotFound() {
   useEffect(() => {
@@ -52,17 +51,6 @@ export default function NotFound() {
           </div>
         </div>
       </main>
-
-      {/* Floating WhatsApp Button */}
-      <a
-        href="https://wa.me/8801746867350?text=Hello%2C%20I%20want%20to%20know%20about%20Astronaut%20Reading%20Lamp"
-        target="_blank"
-        rel="noreferrer"
-        className="fixed bottom-6 right-4 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#16a34a] hover:bg-[#15803d] text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all cursor-pointer group"
-        aria-label="হোয়াটসঅ্যাপে যোগাযোগ করুন"
-      >
-        <FaWhatsapp className="text-2xl sm:text-3xl group-hover:rotate-12 transition-transform duration-300" />
-      </a>
 
     </div>
   );
