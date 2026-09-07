@@ -106,3 +106,54 @@ body {
 .safe-bottom {
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
 }
+
+/* Complementary Typography & Gradients for Admin & Secondary Pages */
+.font-bangla {
+  font-family: 'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+}
+
+.font-latin {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.font-number,
+.font-bangla-number {
+  font-family: 'Noto Sans Bengali', system-ui, sans-serif;
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.bg-gradient-blue {
+  background: linear-gradient(135deg, #0A58CA 0%, #0265FF 50%, #0284C7 100%);
+}
+
+.bg-gradient-blue-hover:hover {
+  background: linear-gradient(135deg, #0849AA 0%, #0052D4 50%, #0274B0 100%);
+}
+
+.bg-gradient-subtle-mesh {
+  background: radial-gradient(circle at 10% 20%, rgba(2, 101, 255, 0.06) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+              #FFFFFF;
+}
+
+.modern-shadow-sm {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+.modern-shadow {
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+}
+
+.modern-shadow-lg {
+  box-shadow: 0 20px 40px -15px rgba(2, 101, 255, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.04);
+}
+
+.card-hover {
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px -4px rgba(2, 101, 255, 0.1), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+}

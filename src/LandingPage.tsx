@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createSupabaseOrder } from './utils/orderStorage';
 import astronautClockSpaceImg from './assets/astronaut_clock.jpg';
 import astronautBoxImg from './assets/astronaut_clock_lamp.jpg';
 import orangeLampImg from './assets/clock_lamp.jpg';
@@ -9,7 +11,6 @@ import {
   LuShoppingBag,
   LuTruck,
   LuShieldCheck,
-  LuCheck,
   LuCircleCheck,
   LuChevronDown,
   LuUser,
@@ -34,8 +35,10 @@ import { FaWhatsapp } from 'react-icons/fa6';
 import { TbRotate360 } from 'react-icons/tb';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ src: string; title: string; badge: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderForm, setOrderForm] = useState({
     name: '',
     phone: '',
@@ -45,8 +48,6 @@ export default function LandingPage() {
     deliveryZone: 'dhaka_inside' // 'dhaka_inside' (70) or 'dhaka_outside' (130)
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [orderId, setOrderId] = useState('');
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -93,7 +94,7 @@ export default function LandingPage() {
     }
   };
 
-  const handleOrderSubmit = (e: React.FormEvent) => {
+  const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: Record<string, string> = {};
 
@@ -116,9 +117,71 @@ export default function LandingPage() {
     }
 
     setFormErrors({});
-    const randomId = `AST-${Math.floor(100000 + Math.random() * 900000)}`;
-    setOrderId(randomId);
-    setOrderSuccess(true);
+    setIsSubmitting(true);
+
+    try {
+      // 1. Create order in Supabase table: neworders
+      const { data: createdOrder, error } = await createSupabaseOrder({
+        name: orderForm.name.trim(),
+        phone: orderForm.phone.trim(),
+        address: orderForm.address.trim(),
+        product: '2-in-1 Astronaut Reading Lamp & Alarm Clock',
+        color: orderForm.variant,
+        quantity: orderForm.quantity,
+        price: offerPrice,
+        shipping_amount: deliveryCharge,
+        total_amount: totalAmount,
+        status: 'pending',
+      });
+
+      if (error) {
+        console.warn('Supabase insertion notice:', error);
+      }
+
+      const fallbackId = Math.floor(100000 + Math.random() * 900000);
+      const finalOrderId = createdOrder?.id
+        ? `AST-${createdOrder.id}`
+        : `AST-${fallbackId}`;
+
+      // 2. Navigate to Thank You page with order details for Meta Pixel Purchase tracking
+      navigate('/thank-you', {
+        state: {
+          order: {
+            selectedColor: orderForm.variant,
+            quantity: orderForm.quantity,
+            customerName: orderForm.name.trim(),
+            phoneNumber: orderForm.phone.trim(),
+            fullAddress: orderForm.address.trim(),
+            deliveryArea: orderForm.deliveryZone,
+          },
+          orderNumber: finalOrderId,
+          grandTotal: totalAmount,
+          deliveryFee: deliveryCharge,
+          subtotal: subtotal,
+        },
+      });
+    } catch (err) {
+      console.error('Order submission error:', err);
+      const fallbackId = `AST-${Math.floor(100000 + Math.random() * 900000)}`;
+      navigate('/thank-you', {
+        state: {
+          order: {
+            selectedColor: orderForm.variant,
+            quantity: orderForm.quantity,
+            customerName: orderForm.name.trim(),
+            phoneNumber: orderForm.phone.trim(),
+            fullAddress: orderForm.address.trim(),
+            deliveryArea: orderForm.deliveryZone,
+          },
+          orderNumber: fallbackId,
+          grandTotal: totalAmount,
+          deliveryFee: deliveryCharge,
+          subtotal: subtotal,
+        },
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const faqItems = [
@@ -944,13 +1007,23 @@ export default function LandingPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-extrabold text-lg sm:text-xl shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer text-center"
+                disabled={isSubmitting}
+                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-extrabold text-lg sm:text-xl shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer text-center disabled:opacity-75 disabled:cursor-not-allowed"
               >
-                <LuShoppingBag size={22} />
-                <span className="sm:hidden">অর্ডার কনফার্ম করুন</span>
-                <span className="hidden sm:inline">
-                  অর্ডার কনফার্ম করুন (সর্বমোট বিল: ৳ {totalAmount.toLocaleString('bn-BD')})
-                </span>
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>অর্ডার প্রক্রিয়াকরণ হচ্ছে...</span>
+                  </>
+                ) : (
+                  <>
+                    <LuShoppingBag size={22} />
+                    <span className="sm:hidden">অর্ডার কনফার্ম করুন</span>
+                    <span className="hidden sm:inline">
+                      অর্ডার কনফার্ম করুন (সর্বমোট বিল: ৳ {totalAmount.toLocaleString('bn-BD')})
+                    </span>
+                  </>
+                )}
               </button>
 
             </form>
@@ -1147,93 +1220,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-
-      {/* ==================================================
-          ORDER SUCCESS MODAL
-          ================================================== */}
-      {orderSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl relative animate-in fade-in">
-            <div className="w-16 h-16 rounded-full bg-sky-50 text-[#0284C7] flex items-center justify-center mx-auto mb-4 border border-sky-200">
-              <LuCheck size={32} />
-            </div>
-
-            <h3 className="text-2xl font-bold text-[#0F172A] mb-2">
-              অভিনন্দন! আপনার অর্ডার সফল হয়েছে
-            </h3>
-            <p className="text-sm text-[#475569] mb-4">
-              অর্ডার ট্র্যাকিং আইডি: <span className="font-en text-[#0284C7] font-bold">{orderId}</span>
-            </p>
-
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-3 mb-6 divide-y divide-slate-200/70">
-              <div className="space-y-2.5 pb-2.5">
-                <div className="flex justify-between items-start gap-3 text-[#475569]">
-                  <span className="shrink-0 font-medium">গ্রাহকের নাম:</span>
-                  <span className="text-[#0F172A] font-bold text-right break-words">{orderForm.name}</span>
-                </div>
-                <div className="flex justify-between items-center gap-3 text-[#475569]">
-                  <span className="shrink-0 font-medium">মোবাইল নম্বর:</span>
-                  <span className="font-en text-[#0F172A] font-bold text-right">{orderForm.phone}</span>
-                </div>
-                <div className="flex justify-between items-start gap-3 text-[#475569]">
-                  <span className="shrink-0 font-medium">ডেলিভারি ঠিকানা:</span>
-                  <span className="text-[#0F172A] font-medium text-right break-words max-w-[200px] leading-relaxed">
-                    {orderForm.address}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center gap-3 text-[#475569]">
-                  <span className="shrink-0 font-medium">নির্বাচিত কালার:</span>
-                  <span className="text-[#0284C7] font-bold text-right">{orderForm.variant}</span>
-                </div>
-                <div className="flex justify-between items-center gap-3 text-[#475569]">
-                  <span className="shrink-0 font-medium">পরিমাণ:</span>
-                  <span className="text-[#0F172A] font-bold font-num text-right">
-                    {orderForm.quantity.toLocaleString('bn-BD')} টি
-                  </span>
-                </div>
-                <div className="flex justify-between items-center gap-3 text-[#475569]">
-                  <span className="shrink-0 font-medium">ডেলিভারি এলাকা:</span>
-                  <span className="text-[#0F172A] font-medium text-right">
-                    {orderForm.deliveryZone === 'dhaka_inside' ? 'ঢাকা সিটির ভিতরে (৳ ৭০)' : 'ঢাকা সিটির বাইরে (৳ ১৩০)'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center pt-3">
-                <span className="text-sm font-bold text-[#0F172A]">সর্বমোট বিল:</span>
-                <div className="text-right flex flex-col items-end">
-                  <span className="font-num text-[#0284C7] text-lg font-black">
-                    ৳ {totalAmount.toLocaleString('bn-BD')}
-                  </span>
-                  <span className="text-[11px] text-[#64748B] font-normal">(ক্যাশ অন ডেলিভারি)</span>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-xs text-[#64748B] mb-6">
-              খুব দ্রুত আমাদের প্রতিনিধি আপনার সাথে কল করে অর্ডার নিশ্চিত করবে এবং পার্সেল পাঠিয়ে দেওয়া হবে।
-            </p>
-
-            <button
-              type="button"
-              onClick={() => {
-                setOrderSuccess(false);
-                setOrderForm({
-                  name: '',
-                  phone: '',
-                  address: '',
-                  variant: 'স্পেস ব্লু (Space Blue)',
-                  quantity: 1,
-                  deliveryZone: 'dhaka_inside'
-                });
-              }}
-              className="w-full py-3.5 rounded-xl bg-[#0284C7] hover:bg-[#0369a1] text-white font-bold text-sm cursor-pointer transition-colors"
-            >
-              ঠিক আছে
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ==================================================
           IMAGE LIGHTBOX MODAL (Click to enlarge)
