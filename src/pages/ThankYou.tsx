@@ -54,7 +54,7 @@ export const ThankYou: React.FC = () => {
     if (typeof window !== "undefined" && typeof (window as any).fbq === "function") {
       (window as any).fbq("track", "Purchase", {
         content_name: PRODUCT_INFO.name,
-        content_ids: ["double_flashlight"],
+        content_ids: ["charles_delon_watch"],
         content_type: "product",
         value: grandTotal,
         currency: "BDT",

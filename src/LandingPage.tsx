@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createSupabaseOrder } from './utils/orderStorage';
-import astronautClockSpaceImg from './assets/astronaut_clock.jpg';
-import astronautBoxImg from './assets/astronaut_clock_lamp.jpg';
-import orangeLampImg from './assets/clock_lamp.jpg';
-import blueLampImg from './assets/white_clock.jpg';
+import blackWatchImg from './assets/blackwatch.webp';
+import blueWatchImg from './assets/blue_watch.webp';
+import grayWatchImg from './assets/gray_watch.webp';
+import watchBlackSplashImg from './assets/watch_black.webp';
+import watchBlueSplashImg from './assets/watch_blue.webp';
+import watchColorSplashImg from './assets/watch_color.webp';
 
-// Premium React Icons for modern, polished aesthetic
+// Icons for modern, polished aesthetic matching reference
 import {
   LuShoppingBag,
   LuTruck,
@@ -19,20 +21,17 @@ import {
   LuPlus,
   LuMinus,
   LuClock,
-  LuAlarmClock,
-  LuLampDesk,
-  LuMoonStar,
-  LuBatteryCharging,
   LuPalette,
-  LuZap,
-  LuCable,
+  LuSparkles,
+  LuUsers,
+  LuDroplets,
+  LuGift,
   LuEye,
   LuPackageCheck,
   LuArrowUp
 } from 'react-icons/lu';
 import { HiBars3, HiXMark } from 'react-icons/hi2';
 import { FaWhatsapp } from 'react-icons/fa6';
-import { TbRotate360 } from 'react-icons/tb';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -43,17 +42,17 @@ export default function LandingPage() {
     name: '',
     phone: '',
     address: '',
-    variant: 'স্পেস ব্লু (Space Blue)',
+    variant: 'ব্ল্যাক স্ট্র্যাপ (Black Strap)',
     quantity: 1,
     deliveryZone: 'dhaka_outside' // 'dhaka_outside' (130) or 'dhaka_inside' (70)
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
-  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showMobileFloatingBar, setShowMobileFloatingBar] = useState(false);
 
   useEffect(() => {
-    document.title = '2-in-1 Astronaut Reading Lamp & Alarm Clock | সোনামণির পড়ার সঙ্গী';
-    
+    document.title = 'Charles Delon Color-Changing Watch | আলো পড়লেই রঙ বদলায়! আপনার লুক হোক আলাদা';
+
     // Hash scrolling if landed with #order-form or similar
     if (window.location.hash) {
       const id = window.location.hash.replace('#', '');
@@ -66,21 +65,37 @@ export default function LandingPage() {
     }
   }, []);
 
+  // Control mobile floating purchase bar: visible across all sections EXCEPT Hero and Order Form
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
+      const heroEl = document.getElementById('hero');
+      const orderFormEl = document.getElementById('order-form');
+
+      const scrollY = window.scrollY;
+      const heroHeight = heroEl ? heroEl.offsetHeight : 450;
+      const isPastHero = scrollY > (heroHeight - 120);
+
+      let isInsideOrderForm = false;
+      if (orderFormEl) {
+        const rect = orderFormEl.getBoundingClientRect();
+        isInsideOrderForm = rect.top < (window.innerHeight - 60) && rect.bottom > 80;
+      }
+
+      if (isPastHero && !isInsideOrderForm) {
+        setShowMobileFloatingBar(true);
       } else {
-        setShowScrollTop(false);
+        setShowMobileFloatingBar(false);
       }
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Pricing configuration
-  const regularPrice = 1150;
-  const offerPrice = 830;
+  const regularPrice = 1290;
+  const offerPrice = 890;
   const deliveryCharge = orderForm.deliveryZone === 'dhaka_inside' ? 70 : 130;
   const subtotal = orderForm.quantity * offerPrice;
   const totalAmount = subtotal + deliveryCharge;
@@ -97,22 +112,42 @@ export default function LandingPage() {
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: Record<string, string> = {};
+    let firstErrorFieldId = '';
 
     if (!orderForm.name.trim()) {
       errors.name = 'অনুগ্রহ করে আপনার পুরো নাম লিখুন';
+      if (!firstErrorFieldId) firstErrorFieldId = 'form-input-name';
     }
 
     const cleanPhone = orderForm.phone.replace(/[^0-9]/g, '');
     if (!cleanPhone || cleanPhone.length < 11) {
       errors.phone = 'সঠিক ১১ ডিজিটের মোবাইল নম্বর লিখুন (যেমন: 017XXXXXXXX)';
+      if (!firstErrorFieldId) firstErrorFieldId = 'form-input-phone';
     }
 
     if (!orderForm.address.trim() || orderForm.address.trim().length < 8) {
       errors.address = 'অনুগ্রহ করে সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন (বাসা/রোড/এলাকা/জেলা)';
+      if (!firstErrorFieldId) firstErrorFieldId = 'form-input-address';
     }
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+
+      // Smoothly scroll back to the top of the missing or required area and focus it
+      if (firstErrorFieldId) {
+        const errorEl = document.getElementById(firstErrorFieldId);
+        if (errorEl) {
+          errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            errorEl.focus();
+          }, 300);
+        } else {
+          const formTop = document.getElementById('order-form');
+          if (formTop) {
+            formTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      }
       return;
     }
 
@@ -125,7 +160,7 @@ export default function LandingPage() {
         name: orderForm.name.trim(),
         phone: orderForm.phone.trim(),
         address: orderForm.address.trim(),
-        product: '2-in-1 Astronaut Reading Lamp & Alarm Clock',
+        product: 'Charles Delon Color-Changing Dial Watch',
         color: orderForm.variant,
         quantity: orderForm.quantity,
         price: offerPrice,
@@ -140,8 +175,8 @@ export default function LandingPage() {
 
       const fallbackId = Math.floor(100000 + Math.random() * 900000);
       const finalOrderId = createdOrder?.id
-        ? `AST-${createdOrder.id}`
-        : `AST-${fallbackId}`;
+        ? `CD-${createdOrder.id}`
+        : `CD-${fallbackId}`;
 
       // 2. Navigate to Thank You page with order details for Meta Pixel Purchase tracking
       navigate('/thank-you', {
@@ -162,7 +197,7 @@ export default function LandingPage() {
       });
     } catch (err) {
       console.error('Order submission error:', err);
-      const fallbackId = `AST-${Math.floor(100000 + Math.random() * 900000)}`;
+      const fallbackId = `CD-${Math.floor(100000 + Math.random() * 900000)}`;
       navigate('/thank-you', {
         state: {
           order: {
@@ -186,28 +221,24 @@ export default function LandingPage() {
 
   const faqItems = [
     {
-      q: '১. এটি কী কী কাজে ব্যবহার করা যায়?',
-      a: 'এটি রিডিং ল্যাম্প, নাইট লাইট এবং অ্যালার্ম ঘড়ি—তিনভাবেই ব্যবহার করা যায়।'
+      q: '১. ঘড়িটির ডায়াল কি সত্যিই রঙ পরিবর্তন করে?',
+      a: 'আলোর প্রতিফলন ও আলোর পরিবর্তনের কারণে ডায়ালের গ্রেডিয়েন্ট রঙের শেড ভিন্নভাবে দেখা যায়।'
     },
     {
-      q: '২. ল্যাম্পটির নেক কি ঘোরানো যায়?',
-      a: 'হ্যাঁ, ৩৬০° ফ্লেক্সিবল নেক প্রয়োজন অনুযায়ী যেকোনো দিকে ঘুরিয়ে আলো ফোকাস করা যায়।'
+      q: '২. এটি কি ছেলে ও মেয়ে উভয়েই ব্যবহার করতে পারবে?',
+      a: 'হ্যাঁ, এর ইউনিসেক্স ডিজাইন পুরুষ ও নারী উভয়ের জন্য উপযোগী।'
     },
     {
-      q: '৩. এটি কি রিচার্জেবল?',
-      a: 'হ্যাঁ, এতে শক্তিশালী রিচার্জেবল ব্যাটারি রয়েছে যা তার ছাড়াই ব্যবহারযোগ্য।'
+      q: '৩. স্ট্র্যাপটি কেমন?',
+      a: 'স্ট্র্যাপটি নরম রাবার/সিলিকন ধরনের, যা হাতে আরামদায়কভাবে পরা যায়।'
     },
     {
-      q: '৪. এতে কি অ্যালার্ম ঘড়ি আছে?',
-      a: 'হ্যাঁ, মাঝখানে একটি নির্ভুল ও প্রিমিয়াম এনালগ ঘড়ি রয়েছে।'
+      q: '৪. ঘড়িটি কি পানিতে ব্যবহার করা যায়?',
+      a: 'এটি ওয়াটার রেসিস্ট্যান্ট হওয়ায় হাত ধোয়া বা হালকা বৃষ্টির মতো দৈনন্দিন পরিস্থিতিতে ব্যবহার করা যায়।'
     },
     {
-      q: '৫. বাচ্চাদের জন্য এটি কেন ভালো?',
-      a: 'কিউট স্পেস ডিজাইন, রিডিং লাইট এবং ঘড়ির সুবিধা একসাথে থাকায় এটি বাচ্চার পড়ার টেবিলের জন্য একটি আকর্ষণীয় ও সময় সচেতনতার গ্যাজেট।'
-    },
-    {
-      q: '৬. এটি কি গিফট হিসেবে দেওয়া যাবে?',
-      a: 'অবশ্যই। জন্মদিন বা বিশেষ দিনে উপহার দেওয়ার জন্য এটি আকর্ষণীয় কালারফুল বক্স প্যাকেজিংসহ আসে।'
+      q: '৫. এটি কি উপহার হিসেবে দেওয়া যাবে?',
+      a: 'অবশ্যই। স্টাইলিশ ডিজাইন ও আকর্ষণীয় ডায়ালের কারণে এটি প্রিয়জনকে উপহার দেওয়ার জন্যও সুন্দর একটি পছন্দ।'
     }
   ];
 
@@ -225,10 +256,10 @@ export default function LandingPage() {
             <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#0284C7] shadow-[0_0_12px_rgba(2,132,199,0.7)] animate-pulse shrink-0" />
             <a href="#" className="flex flex-col text-left group">
               <div className="font-en text-base sm:text-lg font-extrabold tracking-wider text-[#0F172A] group-hover:text-[#0284C7] transition-colors leading-tight">
-                ASTRONAUT <span className="text-[#0284C7] font-bold text-xs sm:text-sm">2-in-1</span>
+                CHARLES DELON
               </div>
               <span className="text-[11px] sm:text-xs text-[#64748B] font-medium tracking-normal font-bn leading-tight">
-                অ্যালার্ম ও ল্যাম্প
+                কালার চেঞ্জিং ডায়াল ঘড়ি
               </span>
             </a>
           </div>
@@ -244,8 +275,8 @@ export default function LandingPage() {
             <button onClick={() => scrollToSection('features')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
               ফিচার্স
             </button>
-            <button onClick={() => scrollToSection('offer')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
-              অফার
+            <button onClick={() => scrollToSection('gift')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
+              উপহার দিন
             </button>
             <button onClick={() => scrollToSection('faq')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
               প্রশ্নোত্তর
@@ -291,13 +322,13 @@ export default function LandingPage() {
               প্রোডাক্ট গ্যালারি
             </button>
             <button onClick={() => scrollToSection('features')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7] border-b border-slate-100">
-              ডিভাইস সুবিধা
+              ফিচার্স
             </button>
-            <button onClick={() => scrollToSection('offer')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7] border-b border-slate-100">
-              বিশেষ অফার
+            <button onClick={() => scrollToSection('gift')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7] border-b border-slate-100">
+              উপহার দিন
             </button>
             <button onClick={() => scrollToSection('faq')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7]">
-              সচরাচর প্রশ্নাবলী
+              প্রশ্নোত্তর
             </button>
           </div>
         )}
@@ -305,9 +336,9 @@ export default function LandingPage() {
 
 
       {/* ==================================================
-          HERO SECTION (Using astronaut_clock.jpg)
+          HERO SECTION
           ================================================== */}
-      <section className="relative pt-6 pb-14 md:pt-14 md:pb-24 overflow-hidden">
+      <section id="hero" className="relative pt-6 pb-14 md:pt-14 md:pb-24 overflow-hidden">
         {/* Light ambient subtle orbs */}
         <div className="hidden lg:block absolute -top-10 -right-10 w-72 h-72 eclipse-orb opacity-60 z-0" />
         <div className="hidden lg:block absolute bottom-0 left-10 w-80 h-80 eclipse-orb opacity-40 z-0" />
@@ -322,33 +353,33 @@ export default function LandingPage() {
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-50 border border-sky-200 w-fit mb-4 md:mb-6 shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
                 <span className="text-xs uppercase tracking-wider text-[#0284C7] font-bold">
-                  সীমিত স্টক • পছন্দের কালার বেছে নিন
+                  সীমিত স্টক • কালার চেঞ্জিং ডায়াল
                 </span>
               </div>
 
               {/* Headline */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.5rem] font-bold tracking-tight text-[#0F172A] leading-[1.25] mb-4 md:mb-5 font-bn">
-                পড়ার টেবিল, রুম কিংবা গিফটের জন্য <br className="hidden sm:inline" />
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] xl:text-[2.85rem] font-bold tracking-tight text-[#0F172A] leading-[1.3] mb-4 md:mb-5 font-bn">
+                আলো পড়লেই রঙ বদলায়! <br className="hidden sm:inline" />
                 <span className="bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#2563EB] bg-clip-text text-transparent">
-                  কিউট Astronaut Lamp
+                  সাধারণ ঘড়ির ভিড়ে আপনার লুক হোক আলাদা
                 </span>
               </h1>
 
               {/* Subtitle */}
               <p className="text-base sm:text-lg md:text-xl text-[#475569] leading-relaxed mb-6 font-normal">
-                সোনামণির পড়ার সময় বাড়াবে মনোযোগ, আর ডেস্কে যোগ করবে দারুণ এক স্পেস-থিমের সৌন্দর্য। আলো, ঘড়ি ও আরামের জন্য প্রয়োজনীয় সুবিধা—একটি ছোট্ট গ্যাজেটেই।
+                সাধারণ ঘড়ির বাইরে, আলোর প্রতিফলনে রঙ বদলানো নজরকাড়া ডায়াল আর স্টাইলিশ ডিজাইনে প্রতিটি মুহূর্তে আপনার লুকে যোগ করবে আলাদা আকর্ষণ।
               </p>
 
               {/* Price / Offer Display */}
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-4xl sm:text-5xl font-black text-[#0284C7] font-num tracking-tight">
-                  ৳ ৮৩০
+                  ৳ ৮৯০
                 </span>
                 <span className="text-xl sm:text-2xl text-[#94A3B8] line-through font-num font-semibold">
-                  ৳ ১,১৫০
+                  ৳ ১,২৯০
                 </span>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-100 text-[#0284C7] ml-2">
-                  (৳ ৩২০ ছাড়)
+                  (৳ ৪০০ ছাড়)
                 </span>
               </div>
 
@@ -362,7 +393,7 @@ export default function LandingPage() {
                   <span>এখনই অর্ডার করুন</span>
                 </button>
                 <a
-                  href="https://wa.me/8801746867350?text=Hello%2C%20I%20want%20to%20order%20Astronaut%20Reading%20Lamp"
+                  href="https://wa.me/8801746867350?text=Hello%2C%20I%20want%20to%20order%20Charles%20Delon%20Color-Changing%20Watch"
                   target="_blank"
                   rel="noreferrer"
                   className="flex-1 flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-base sm:text-lg shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer text-center"
@@ -372,35 +403,38 @@ export default function LandingPage() {
                 </a>
               </div>
 
-              {/* Trust Badges */}
-              <div className="flex items-center gap-6 text-sm text-[#475569] font-medium">
-                <span className="flex items-center gap-2">
-                  <LuTruck className="text-[#0284C7]" size={19} /> সারা দেশে হোম ডেলিভারি
+              {/* Trust Badges & Supporting Text */}
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-[#475569] font-medium">
+                <span className="flex items-center gap-1.5 sm:gap-2 text-[#0284C7] font-semibold bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">
+                  <LuSparkles size={16} /> ছেলে-মেয়ে সবার জন্য উপযোগী
                 </span>
-                <span className="flex items-center gap-2">
-                  <LuShieldCheck className="text-[#0284C7]" size={19} /> ক্যাশ অন ডেলিভারি
+                <span className="flex items-center gap-1.5 sm:gap-2">
+                  <LuTruck className="text-[#0284C7]" size={18} /> সারা দেশে হোম ডেলিভারি
+                </span>
+                <span className="flex items-center gap-1.5 sm:gap-2">
+                  <LuShieldCheck className="text-[#0284C7]" size={18} /> ক্যাশ অন ডেলিভারি
                 </span>
               </div>
             </div>
 
-            {/* Hero Right Visual: Using astronaut_clock.jpg */}
+            {/* Hero Right Visual */}
             <div className="lg:col-span-5 relative flex justify-center items-center mt-2 lg:mt-0">
               <div className="relative w-full max-w-md lg:max-w-none rounded-3xl p-3 sm:p-4 bg-white border border-slate-200 shadow-xl group z-10">
                 <img
-                  src={astronautClockSpaceImg}
-                  alt="2-in-1 Astronaut Reading Lamp & Alarm Clock"
+                  src={watchBlackSplashImg}
+                  alt="Charles Delon Color-Changing Dial Watch"
                   className="w-full h-auto object-cover max-h-[380px] sm:max-h-[440px] md:max-h-[480px] rounded-2xl transition-transform duration-500 group-hover:scale-[1.02]"
                   loading="eager"
                 />
 
-                {/* Floating Feature Tags */}
-                <div className="absolute -bottom-3 left-4 sm:left-6 px-3.5 py-2 rounded-xl bg-white border border-sky-200 shadow-lg flex items-center gap-2">
-                  <TbRotate360 size={18} className="text-[#0284C7]" />
-                  <span className="text-xs font-semibold text-[#0F172A]">৩৬০° ফ্লেক্সিবল নেক</span>
+                {/* Floating Feature Tags at Bottom */}
+                <div className="absolute -bottom-3 left-2.5 sm:left-6 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-white border border-sky-200 shadow-lg flex items-center gap-1.5 sm:gap-2 z-20">
+                  <LuPalette size={16} className="text-[#0284C7] shrink-0" />
+                  <span className="text-[11px] sm:text-xs font-semibold text-[#0F172A]">রঙ বদলানো ডায়াল</span>
                 </div>
-                <div className="absolute top-4 right-4 sm:right-6 px-3.5 py-2 rounded-xl bg-white border border-sky-200 shadow-lg flex items-center gap-2">
-                  <LuClock size={16} className="text-[#0284C7]" />
-                  <span className="text-xs font-semibold text-[#0284C7]">এনালগ অ্যালার্ম ঘড়ি</span>
+                <div className="absolute -bottom-3 right-2.5 sm:right-6 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-white border border-sky-200 shadow-lg flex items-center gap-1.5 sm:gap-2 z-20">
+                  <LuDroplets size={16} className="text-[#0284C7] shrink-0" />
+                  <span className="text-[11px] sm:text-xs font-semibold text-[#0284C7]">ওয়াটার রেসিস্ট্যান্ট</span>
                 </div>
               </div>
             </div>
@@ -410,14 +444,17 @@ export default function LandingPage() {
       </section>
 
 
+
+
+
       {/* ==================================================
-          CORE BENEFITS (4 Cards)
+          4 CORE BENEFITS (4 Cards Grid)
           ================================================== */}
       <section id="benefits" className="py-12 md:py-16 border-t border-slate-200/80 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
           <div className="mb-6 md:mb-8 text-center">
-            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-1.5">
+            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-3 sm:mb-3.5">
               মূল বৈশিষ্ট্যসমূহ
             </span>
             <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#0F172A] tracking-tight">
@@ -433,49 +470,49 @@ export default function LandingPage() {
                 ০১
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2">
-                রিডিং ল্যাম্প
+                আলোতে বদলায় রঙ
               </h3>
               <p className="text-[#475569] text-xs sm:text-sm leading-relaxed font-normal">
-                পড়াশোনার সময় প্রয়োজনীয় চোখ-বান্ধব আলো পেতে ব্যবহার করুন রিডিং ল্যাম্প হিসেবে।
+                আলোর প্রতিফলনে ডায়ালের গ্রেডিয়েন্ট শেড ভিন্নভাবে ফুটে ওঠে, যা ঘড়িটিকে দেয় আলাদা এক আকর্ষণ।
               </p>
             </div>
 
             {/* Card 02 */}
-            <div className="p-6 sm:p-7 rounded-2xl light-card flex flex-col justify-start group hover:border-amber-300">
-              <div className="font-num text-4xl sm:text-5xl font-black text-amber-200 group-hover:text-amber-500 transition-colors mb-3">
+            <div className="p-6 sm:p-7 rounded-2xl light-card flex flex-col justify-start group hover:border-cyan-300">
+              <div className="font-num text-4xl sm:text-5xl font-black text-cyan-200 group-hover:text-cyan-600 transition-colors mb-3">
                 ০২
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2">
-                অ্যালার্ম ঘড়ি
+                ওয়াটার প্রুফ
               </h3>
               <p className="text-[#475569] text-xs sm:text-sm leading-relaxed font-normal">
-                সকালে সময়মতো ঘুম থেকে ওঠা এবং পড়ার রুটিন সঠিকভাবে বজায় রাখতে সাহায্য করে।
+                হাত ধোয়া, বৃষ্টির পানি কিংবা দৈনন্দিন পানির ছিটা থেকে ঘড়িটিকে রাখে সুরক্ষিত ও নিরাপদ।
               </p>
             </div>
 
             {/* Card 03 */}
-            <div className="p-6 sm:p-7 rounded-2xl light-card flex flex-col justify-start group hover:border-indigo-300">
-              <div className="font-num text-4xl sm:text-5xl font-black text-indigo-200 group-hover:text-indigo-500 transition-colors mb-3">
+            <div className="p-6 sm:p-7 rounded-2xl light-card flex flex-col justify-start group hover:border-blue-300">
+              <div className="font-num text-4xl sm:text-5xl font-black text-blue-200 group-hover:text-blue-600 transition-colors mb-3">
                 ০৩
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2">
-                নাইট ল্যাম্প
+                সব পোশাকের সাথে মানানসই
               </h3>
               <p className="text-[#475569] text-xs sm:text-sm leading-relaxed font-normal">
-                ঘুমানোর আগে বা বিশ্রামের সময় আরামদায়ক ও মৃদু আলো হিসেবে ব্যবহারের চমৎকার সুবিধা।
+                ক্যাজুয়াল ও ফর্মাল যেকোনো পোশাকের সাথেই নিখুঁতভাবে মানিয়ে যায় এবং ছেলে-মেয়ে উভয়ের জন্য উপযোগী।
               </p>
             </div>
 
             {/* Card 04 */}
-            <div className="p-6 sm:p-7 rounded-2xl light-card flex flex-col justify-start group hover:border-emerald-300">
-              <div className="font-num text-4xl sm:text-5xl font-black text-emerald-200 group-hover:text-emerald-500 transition-colors mb-3">
+            <div className="p-6 sm:p-7 rounded-2xl light-card flex flex-col justify-start group hover:border-indigo-300">
+              <div className="font-num text-4xl sm:text-5xl font-black text-indigo-200 group-hover:text-indigo-500 transition-colors mb-3">
                 ০৪
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2">
-                সময় ও অভ্যাস
+                সারাদিন আরামদায়ক
               </h3>
               <p className="text-[#475569] text-xs sm:text-sm leading-relaxed font-normal">
-                মাঝখানের এনালগ ঘড়ির মাধ্যমে ছোটবেলা থেকেই সময় মেনে চলার অভ্যাস তৈরি করতে সাহায্য করুন।
+                নরম রাবার/সিলিকন স্ট্র্যাপ হাতে আরামদায়ক অনুভূতি দেয় এবং দীর্ঘক্ষণ ব্যবহারের জন্য অত্যন্ত সুবিধাজনক।
               </p>
             </div>
           </div>
@@ -485,72 +522,82 @@ export default function LandingPage() {
 
 
       {/* ==================================================
-          PRODUCT GALLERY (4 Image Gallery with Lightbox)
+          PRODUCT GALLERY (6 Image Showcase with Lightbox)
           ================================================== */}
-      <section id="gallery" className="py-14 md:py-20 bg-white border-t border-slate-200/80">
+      <section id="gallery" className="py-12 md:py-16 bg-white border-t border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
-            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-2">
+          <div className="text-center max-w-3xl mx-auto mb-8 md:mb-12">
+            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-3 sm:mb-3.5">
               ছবিসমূহ
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#0F172A] mb-3">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#0F172A] mb-2">
               প্রোডাক্ট গ্যালারি
             </h2>
-            <p className="text-sm sm:text-base text-[#475569]">
+            <p className="text-xs sm:text-sm md:text-base text-[#475569]">
               বড় করে দেখতে যেকোনো ছবির ওপর ক্লিক করুন
             </p>
             <div className="small-design-line" />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-5 lg:gap-6">
             {[
               {
-                src: astronautClockSpaceImg,
-                title: 'স্পেস ব্লু ও স্পেস অরেঞ্জ কালার ভ্যারিয়েন্ট',
-                badge: 'কালার অপশন'
+                src: blackWatchImg,
+                title: 'ব্ল্যাক স্ট্র্যাপ চার্লস ডেলন কালার চেঞ্জিং ডায়াল ওয়াচ',
+                badge: 'ব্ল্যাক স্ট্র্যাপ'
               },
               {
-                src: blueLampImg,
-                title: 'স্পেস ব্লু অ্যাস্ট্রোনাট রিডিং ল্যাম্প ও ঘড়ি',
-                badge: 'স্পেস ব্লু'
+                src: blueWatchImg,
+                title: 'ব্লু স্ট্র্যাপ চার্লস ডেলন কালার চেঞ্জিং ডায়াল ওয়াচ',
+                badge: 'ব্লু স্ট্র্যাপ'
               },
               {
-                src: orangeLampImg,
-                title: 'স্পেস অরেঞ্জ অ্যাস্ট্রোনাট রিডিং ল্যাম্প ও ঘড়ি',
-                badge: 'স্পেস অরেঞ্জ'
+                src: grayWatchImg,
+                title: 'গ্রে স্ট্র্যাপ চার্লস ডেলন কালার চেঞ্জিং ডায়াল ওয়াচ',
+                badge: 'গ্রে স্ট্র্যাপ'
               },
               {
-                src: astronautBoxImg,
-                title: 'আকর্ষণীয় অফিশিয়াল বক্স প্যাকেজিং',
-                badge: 'গিফট বক্স'
+                src: watchBlackSplashImg,
+                title: 'আলোর প্রতিফলনে ডায়ালে লুকিয়ে থাকা রঙের ম্যাজিক',
+                badge: 'ম্যাজিকাল ডায়াল'
+              },
+              {
+                src: watchBlueSplashImg,
+                title: 'ক্যাজুয়াল ও ফর্মাল সব স্টাইলের সাথে মানানসই লুক',
+                badge: 'স্টাইলিশ লুক'
+              },
+              {
+                src: watchColorSplashImg,
+                title: 'নিজের জন্য কিংবা প্রিয়জনকে উপহার দেওয়ার সেরা পছন্দ',
+                badge: 'কালার রিফ্লেকশন'
               }
             ].map((item, index) => (
               <div
                 key={index}
                 onClick={() => setPreviewImage(item)}
-                className="group relative rounded-3xl p-3 sm:p-4 bg-slate-50 border border-slate-200 shadow-sm hover:shadow-xl hover:border-sky-300 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between"
+                className="group relative rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 bg-slate-50 border border-slate-200 shadow-xs hover:shadow-xl hover:border-sky-300 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between"
               >
-                <div className="aspect-square w-full rounded-2xl bg-white border border-slate-100 overflow-hidden flex items-center justify-center p-2 mb-3 relative">
+                <div className="aspect-square w-full rounded-xl sm:rounded-2xl bg-white border border-slate-100 overflow-hidden flex items-center justify-center p-2 mb-2 sm:mb-3 relative">
                   <img
                     src={item.src}
                     alt={item.title}
-                    className="w-full h-full object-contain rounded-xl transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-contain rounded-lg sm:rounded-xl transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   />
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
-                    <span className="px-3 py-1.5 rounded-full bg-white/95 text-[#0284C7] font-bold text-xs shadow-md flex items-center gap-1.5">
-                      <LuEye size={14} /> বড় করে দেখুন
+                  <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg sm:rounded-xl">
+                    <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/95 text-[#0284C7] font-bold text-[10px] sm:text-xs shadow-md flex items-center gap-1 sm:gap-1.5">
+                      <LuEye size={13} /> বড় করে দেখুন
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 px-1">
-                  <span className="font-bold text-xs sm:text-sm text-[#0F172A] truncate">
+                <div className="flex items-center justify-between gap-1.5 px-0.5 sm:px-1">
+                  <span className="font-bold text-[11px] sm:text-xs md:text-sm text-[#0F172A] truncate">
                     {item.badge}
                   </span>
-                  <span className="text-[11px] text-[#0284C7] font-semibold shrink-0">
+                  <span className="text-[10px] sm:text-[11px] text-[#0284C7] font-semibold shrink-0">
                     ভিউ 🔍
                   </span>
                 </div>
@@ -563,77 +610,80 @@ export default function LandingPage() {
 
 
       {/* ==================================================
-          FEATURE SECTION (5 Features - Clean Title Only)
+          FEATURE SECTION (6 Features - Title Only)
           ================================================== */}
-      <section id="features" className="py-16 md:py-24 border-t border-slate-200/80 bg-[#F8FAFC]">
+      <section id="features" className="py-10 md:py-14 border-t border-slate-200/80 bg-[#F8FAFC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
-            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-2">
-              অল-ইন-ওয়ান গ্যাজেট
+          <div className="text-center max-w-3xl mx-auto mb-8 md:mb-10">
+            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-3 sm:mb-3.5">
+              প্রিমিয়াম ফিচারসমূহ
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#0F172A] mb-4">
-              একটি ছোট্ট ডিভাইসে <br className="hidden sm:inline" />
-              <span className="text-[#0284C7]">অনেক সুবিধা</span>
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#0F172A]">
+              যে কারণে ঘড়িটি আলাদা
             </h2>
             <div className="small-design-line" />
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3.5 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-4">
             {/* Feature 01 */}
-            <div className="p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-sky-300">
-              <div className="w-13 h-13 rounded-2xl bg-sky-50 text-[#0284C7] flex items-center justify-center mb-3 border border-sky-100 group-hover:scale-110 transition-transform">
-                <LuLampDesk size={25} />
+            <div className="p-3.5 sm:p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-sky-300">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-sky-50 text-[#0284C7] flex items-center justify-center mb-2.5 sm:mb-3 border border-sky-100 group-hover:scale-110 transition-transform">
+                <LuPalette size={22} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0F172A]">রিডিং ল্যাম্প</h3>
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-[#0F172A] leading-snug">
+                রঙ বদলানো ডায়াল
+              </h3>
             </div>
 
             {/* Feature 02 */}
-            <div className="p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-indigo-300">
-              <div className="w-13 h-13 rounded-2xl bg-indigo-50 text-[#4F46E5] flex items-center justify-center mb-3 border border-indigo-100 group-hover:scale-110 transition-transform">
-                <LuMoonStar size={25} />
+            <div className="p-3.5 sm:p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-purple-300">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-purple-50 text-[#7C3AED] flex items-center justify-center mb-2.5 sm:mb-3 border border-purple-100 group-hover:scale-110 transition-transform">
+                <LuSparkles size={22} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0F172A]">নাইট লাইট</h3>
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-[#0F172A] leading-snug">
+                সময়ের সাথে গ্রেডিয়েন্ট কালার
+              </h3>
             </div>
 
             {/* Feature 03 */}
-            <div className="p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-amber-300">
-              <div className="w-13 h-13 rounded-2xl bg-amber-50 text-[#D97706] flex items-center justify-center mb-3 border border-amber-100 group-hover:scale-110 transition-transform">
-                <LuAlarmClock size={25} />
+            <div className="p-3.5 sm:p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-indigo-300">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-indigo-50 text-[#4F46E5] flex items-center justify-center mb-2.5 sm:mb-3 border border-indigo-100 group-hover:scale-110 transition-transform">
+                <LuClock size={22} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0F172A]">অ্যালার্ম ঘড়ি</h3>
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-[#0F172A] leading-snug">
+                স্পষ্ট সময় দেখা
+              </h3>
             </div>
 
             {/* Feature 04 */}
-            <div className="p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-cyan-300">
-              <div className="w-13 h-13 rounded-2xl bg-cyan-50 text-[#0891B2] flex items-center justify-center mb-3 border border-cyan-100 group-hover:scale-110 transition-transform">
-                <TbRotate360 size={25} />
+            <div className="p-3.5 sm:p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-emerald-300">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 text-[#059669] flex items-center justify-center mb-2.5 sm:mb-3 border border-emerald-100 group-hover:scale-110 transition-transform">
+                <LuShieldCheck size={22} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0F172A]">ফ্লেক্সিবল নেক</h3>
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-[#0F172A] leading-snug">
+                নরম সিলিকন স্ট্র্যাপ
+              </h3>
             </div>
 
             {/* Feature 05 */}
-            <div className="p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-emerald-300">
-              <div className="w-13 h-13 rounded-2xl bg-emerald-50 text-[#059669] flex items-center justify-center mb-3 border border-emerald-100 group-hover:scale-110 transition-transform">
-                <LuZap size={25} />
+            <div className="p-3.5 sm:p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-amber-300">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-amber-50 text-[#D97706] flex items-center justify-center mb-2.5 sm:mb-3 border border-amber-100 group-hover:scale-110 transition-transform">
+                <LuUsers size={22} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0F172A]">রিচার্জেবল</h3>
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-[#0F172A] leading-snug">
+                ইউনিসেক্স ডিজাইন
+              </h3>
             </div>
 
             {/* Feature 06 */}
-            <div className="p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-teal-300">
-              <div className="w-13 h-13 rounded-2xl bg-teal-50 text-[#0D9488] flex items-center justify-center mb-3 border border-teal-100 group-hover:scale-110 transition-transform">
-                <LuBatteryCharging size={25} />
+            <div className="p-3.5 sm:p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center group hover:border-cyan-300">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-cyan-50 text-[#0891B2] flex items-center justify-center mb-2.5 sm:mb-3 border border-cyan-100 group-hover:scale-110 transition-transform">
+                <LuDroplets size={22} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0F172A]">৩-৫ ঘণ্টা ব্যাকআপ</h3>
-            </div>
-
-            {/* Feature 07 */}
-            <div className="p-5 rounded-2xl light-card text-center flex flex-col items-center justify-center col-span-2 sm:col-span-1 group hover:border-blue-300">
-              <div className="w-13 h-13 rounded-2xl bg-blue-50 text-[#2563EB] flex items-center justify-center mb-3 border border-blue-100 group-hover:scale-110 transition-transform">
-                <LuCable size={25} />
-              </div>
-              <h3 className="text-sm sm:text-base font-bold text-[#0F172A]">USB চার্জিং ক্যাবল</h3>
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-[#0F172A] leading-snug">
+                ওয়াটার রেসিস্ট্যান্ট
+              </h3>
             </div>
           </div>
 
@@ -641,70 +691,43 @@ export default function LandingPage() {
       </section>
 
 
+
+
+
       {/* ==================================================
-          OFFER SECTION WITH DELIVERY LIST BOX
+          DELIVERY PACKAGE & GIFT BOX
           ================================================== */}
-      <section id="offer" className="py-16 md:py-24 bg-white border-t border-slate-200/80">
+      <section id="gift" className="py-10 md:py-14 bg-[#F8FAFC] border-t border-slate-200/80 scroll-mt-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* Section Header on Top Side */}
-          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
-            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-2">
-              রিচার্জেবল ব্যাকআপ
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#0F172A] mb-3">
-              তার ছাড়াই আলো থাকুক সঙ্গে
-            </h2>
-            <p className="text-sm sm:text-base text-[#475569] leading-relaxed">
-              শক্তিশালী রিচার্জেবল ব্যাটারির কারণে তারের ঝামেলা ছাড়াই ব্যবহার করা যায়। একবার চার্জ করে প্রয়োজন অনুযায়ী ব্যবহার করুন, এমনকি লোডশেডিংয়ের সময়ও।
-            </p>
-            <div className="small-design-line" />
-          </div>
-
-          {/* Main Offer Card Box */}
-          <div className="p-8 sm:p-12 md:p-14 rounded-3xl light-card border-sky-200 shadow-xl relative overflow-hidden">
+          {/* Main Card Box */}
+          <div className="p-6 sm:p-10 md:p-12 rounded-3xl light-card border-sky-200 shadow-xl relative overflow-hidden bg-white">
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
-              {/* Left Side: Offer Title, Pricing & CTA */}
+              {/* Left Side: Gift & Self Purchase Story + Pricing + CTA */}
               <div className="lg:col-span-7 text-center lg:text-left">
-                <div className="inline-block px-4 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-[#0284C7] text-xs font-bold uppercase tracking-wider mb-4">
-                  সীমিত সময়ের স্পেশাল অফার
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-[#0284C7] text-xs font-bold uppercase tracking-wider mb-4 sm:mb-4.5">
+                  <LuGift size={14} />
+                  <span>উপহারের জন্য চমৎকার পছন্দ</span>
                 </div>
 
-                <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0F172A] mb-3 tracking-tight leading-snug">
-                  সোনামণির টেবিলে <br className="hidden sm:inline" />
-                  যোগ হোক নতুন আনন্দ
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0F172A] mb-3 tracking-tight leading-snug">
+                  নিজের জন্য, কিংবা প্রিয় কারও জন্য
                 </h3>
 
-                <p className="text-base sm:text-lg text-[#475569] max-w-xl mx-auto lg:mx-0 mb-6 font-normal">
-                  কিউট ডিজাইন, প্রয়োজনীয় আলো এবং সময়ের সুবিধা—সব একসাথে।
+                <p className="text-sm sm:text-base md:text-lg text-[#475569] max-w-xl mx-auto lg:mx-0 mb-6 leading-relaxed font-normal">
+                  বিশেষ কাউকে খুশি করতে সবসময় বড় কিছু প্রয়োজন হয় না। আলোর প্রতিফলনে রঙ বদলানো একটি সুন্দর ও স্টাইলিশ ঘড়িও হতে পারে মনে রাখার মতো একটি সেরা উপহার।
                 </p>
-
-                {/* Price Pill */}
-                <div className="inline-flex flex-col sm:flex-row items-center gap-3 p-4 sm:px-6 sm:py-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 mb-6">
-                  <div className="flex items-baseline gap-2.5">
-                    <span className="text-xs text-[#64748B] font-semibold">অফার মূল্য:</span>
-                    <span className="text-3xl sm:text-4xl font-black text-[#0284C7] font-num">
-                      ৳ ৮৩০
-                    </span>
-                    <span className="text-base text-[#94A3B8] line-through font-num font-semibold">
-                      ৳ ১,১৫০
-                    </span>
-                  </div>
-                  <span className="text-xs text-[#0284C7] font-bold px-2.5 py-0.5 rounded-full bg-sky-100">
-                    (৳ ৩২০ ছাড়)
-                  </span>
-                </div>
 
                 {/* Action CTA */}
                 <div>
                   <button
                     onClick={() => scrollToSection('order-form')}
-                    className="flex items-center justify-center gap-2.5 w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-extrabold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-extrabold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                   >
-                    <LuShoppingBag size={21} />
-                    <span>এখনই অর্ডার করুন</span>
+                    <LuGift size={21} />
+                    <span>উপহার দিতে অর্ডার করুন</span>
                   </button>
                 </div>
               </div>
@@ -731,19 +754,19 @@ export default function LandingPage() {
                     <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
                       <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
                       <span className="text-sm sm:text-base font-bold text-[#0F172A]">
-                        অ্যাস্ট্রোনট অ্যালার্ম ক্লক
+                        চার্লস ডেলন কালার চেঞ্জিং ওয়াচ
                       </span>
                     </li>
                     <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
                       <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
                       <span className="text-sm sm:text-base font-bold text-[#0F172A]">
-                        গিফট বক্স প্যাকেজিং
+                        আকর্ষণীয় অফিশিয়াল বক্স প্যাকেজিং
                       </span>
                     </li>
                     <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
                       <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
                       <span className="text-sm sm:text-base font-bold text-[#0F172A]">
-                        চার্জিং ক্যাবল
+                        নিরাপদ বাবল র‍্যাপ ডেলিভারি
                       </span>
                     </li>
                   </ul>
@@ -767,160 +790,192 @@ export default function LandingPage() {
       {/* ==================================================
           ORDER FORM SECTION
           ================================================== */}
-      <section id="order-form" className="py-16 md:py-24 border-t border-slate-200/80 bg-[#F8FAFC] scroll-mt-10 relative overflow-hidden">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <section id="order-form" className="py-10 sm:py-16 md:py-24 border-t border-slate-200/80 bg-white scroll-mt-10 relative overflow-hidden">
+        <div className="max-w-3xl mx-auto px-3.5 sm:px-6 lg:px-8 relative z-10">
 
-          <div className="text-center mb-10">
-            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-2">
+          <div className="text-center mb-6 sm:mb-10">
+            <span className="text-[11px] sm:text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-2 sm:mb-3.5">
               সহজ ও দ্রুত অর্ডার
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold text-[#0F172A] mb-2 tracking-tight">
-              অর্ডার করতে নিচের ফর্মটি পূরণ করুন
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#0F172A] mb-1.5 sm:mb-2 tracking-tight">
+              আপনার ঘড়িটি অর্ডার করুন
             </h2>
-            <p className="text-sm sm:text-base text-[#475569] font-normal">
+            <p className="text-xs sm:text-base text-[#475569] font-normal max-w-lg mx-auto">
               ক্যাশ অন ডেলিভারি — পণ্য হাতে পেয়ে চেক করে সম্পূর্ণ মূল্য পরিশোধ করবেন
             </p>
-            <div className="small-design-line" />
+            <div className="small-design-line my-3 sm:my-4" />
           </div>
 
-          <div className="p-6 sm:p-10 rounded-3xl bg-white border border-slate-200 shadow-xl">
-            <form onSubmit={handleOrderSubmit} className="space-y-6">
+          <div className="p-3.5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl bg-slate-50 border border-slate-200 shadow-lg sm:shadow-xl">
+            <form onSubmit={handleOrderSubmit} className="space-y-4 sm:space-y-6">
 
               {/* Name Field */}
               <div>
-                <label className="block text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-2">
-                  <LuUser className="text-[#0284C7]" size={17} />
+                <label htmlFor="form-input-name" className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                  <LuUser className="text-[#0284C7]" size={16} />
                   <span>আপনার নাম</span>
                   <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="form-input-name"
                   type="text"
                   placeholder="আপনার পুরো নাম লিখুন"
                   value={orderForm.name}
                   onChange={(e) => setOrderForm({ ...orderForm, name: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-[#0F172A] placeholder-slate-400 focus:bg-white focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100 outline-none transition-all text-base font-bn"
+                  className={`w-full px-3.5 py-2.5 sm:py-3.5 rounded-xl bg-white border ${formErrors.name
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
+                    } text-[#0F172A] placeholder-slate-400 outline-none transition-all text-sm sm:text-base font-bn`}
                 />
                 {formErrors.name && (
-                  <p className="text-xs text-red-500 font-medium mt-1.5">{formErrors.name}</p>
+                  <p className="text-xs text-red-500 font-medium mt-1">{formErrors.name}</p>
                 )}
               </div>
 
               {/* Phone Field */}
               <div>
-                <label className="block text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-2">
-                  <LuPhone className="text-[#0284C7]" size={17} />
+                <label htmlFor="form-input-phone" className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                  <LuPhone className="text-[#0284C7]" size={16} />
                   <span>মোবাইল নম্বর</span>
                   <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="form-input-phone"
                   type="tel"
                   placeholder="017XXXXXXXX"
                   value={orderForm.phone}
                   onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-[#0F172A] placeholder-slate-400 focus:bg-white focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100 outline-none transition-all text-base font-en"
+                  className={`w-full px-3.5 py-2.5 sm:py-3.5 rounded-xl bg-white border ${formErrors.phone
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
+                    } text-[#0F172A] placeholder-slate-400 outline-none transition-all text-sm sm:text-base font-en`}
                 />
                 {formErrors.phone && (
-                  <p className="text-xs text-red-500 font-medium mt-1.5">{formErrors.phone}</p>
+                  <p className="text-xs text-red-500 font-medium mt-1">{formErrors.phone}</p>
                 )}
               </div>
 
               {/* Address Field */}
               <div>
-                <label className="block text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-2">
-                  <LuMapPin className="text-[#0284C7]" size={17} />
+                <label htmlFor="form-input-address" className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+                  <LuMapPin className="text-[#0284C7]" size={16} />
                   <span>সম্পূর্ণ ডেলিভারি ঠিকানা</span>
                   <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  rows={3}
+                  id="form-input-address"
+                  rows={2}
                   placeholder="বাসা নং, রোড নং, এলাকা/গ্রাম, থানা ও জেলা উল্লেখ করুন"
                   value={orderForm.address}
                   onChange={(e) => setOrderForm({ ...orderForm, address: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-[#0F172A] placeholder-slate-400 focus:bg-white focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100 outline-none transition-all text-base resize-none font-bn"
+                  className={`w-full px-3.5 py-2.5 sm:py-3.5 rounded-xl bg-white border ${formErrors.address
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                      : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
+                    } text-[#0F172A] placeholder-slate-400 outline-none transition-all text-sm sm:text-base resize-none font-bn`}
                 />
                 {formErrors.address && (
-                  <p className="text-xs text-red-500 font-medium mt-1.5">{formErrors.address}</p>
+                  <p className="text-xs text-red-500 font-medium mt-1">{formErrors.address}</p>
                 )}
               </div>
 
-              {/* Color Variant Radio Select */}
+              {/* Color Variant Radio Select (3 Colors) */}
               <div>
-                <label className="block text-sm font-bold text-[#0F172A] mb-2.5 flex items-center gap-2">
-                  <LuPalette className="text-[#0284C7]" size={17} />
-                  <span>পছন্দের রঙ নির্বাচন করুন</span>
+                <label className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-1.5 sm:gap-2">
+                  <LuPalette className="text-[#0284C7]" size={16} />
+                  <span>পছন্দের স্ট্র্যাপ কালার নির্বাচন করুন</span>
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className={`p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('স্পেস ব্লু')
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                  {/* Black Strap */}
+                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('ব্ল্যাক')
                     ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-slate-50 border-slate-200 text-[#475569]'
+                    : 'bg-white border-slate-200 text-[#475569]'
                     }`}>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-2.5">
                       <input
                         type="radio"
                         name="colorVariant"
-                        checked={orderForm.variant.includes('স্পেস ব্লু')}
-                        onChange={() => setOrderForm({ ...orderForm, variant: 'স্পেস ব্লু (Space Blue)' })}
+                        checked={orderForm.variant.includes('ব্ল্যাক')}
+                        onChange={() => setOrderForm({ ...orderForm, variant: 'ব্ল্যাক স্ট্র্যাপ (Black Strap)' })}
                         className="accent-[#0284C7]"
                       />
-                      <span className="font-semibold text-sm">স্পেস ব্লু (Space Blue)</span>
+                      <span className="font-semibold text-xs sm:text-sm">ব্ল্যাক স্ট্র্যাপ</span>
                     </div>
-                    <div className="w-3.5 h-3.5 rounded-full bg-sky-400 border border-white" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-slate-900 border border-white shrink-0" />
                   </label>
 
-                  <label className={`p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('স্পেস অরেঞ্জ')
-                    ? 'bg-orange-50 border-orange-500 text-[#0F172A] shadow-xs'
-                    : 'bg-slate-50 border-slate-200 text-[#475569]'
+                  {/* Blue Strap */}
+                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('ব্লু')
+                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
+                    : 'bg-white border-slate-200 text-[#475569]'
                     }`}>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-2.5">
                       <input
                         type="radio"
                         name="colorVariant"
-                        checked={orderForm.variant.includes('স্পেস অরেঞ্জ')}
-                        onChange={() => setOrderForm({ ...orderForm, variant: 'স্পেস অরেঞ্জ (Space Orange)' })}
-                        className="accent-orange-500"
+                        checked={orderForm.variant.includes('ব্লু')}
+                        onChange={() => setOrderForm({ ...orderForm, variant: 'ব্লু স্ট্র্যাপ (Blue Strap)' })}
+                        className="accent-[#0284C7]"
                       />
-                      <span className="font-semibold text-sm">স্পেস অরেঞ্জ (Space Orange)</span>
+                      <span className="font-semibold text-xs sm:text-sm">ব্লু স্ট্র্যাপ</span>
                     </div>
-                    <div className="w-3.5 h-3.5 rounded-full bg-orange-500 border border-white" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-blue-600 border border-white shrink-0" />
+                  </label>
+
+                  {/* Gray Strap */}
+                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('গ্রে')
+                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
+                    : 'bg-white border-slate-200 text-[#475569]'
+                    }`}>
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                      <input
+                        type="radio"
+                        name="colorVariant"
+                        checked={orderForm.variant.includes('গ্রে')}
+                        onChange={() => setOrderForm({ ...orderForm, variant: 'গ্রে স্ট্র্যাপ (Gray Strap)' })}
+                        className="accent-[#0284C7]"
+                      />
+                      <span className="font-semibold text-xs sm:text-sm">গ্রে স্ট্র্যাপ</span>
+                    </div>
+                    <div className="w-3.5 h-3.5 rounded-full bg-slate-500 border border-white shrink-0" />
                   </label>
                 </div>
               </div>
 
               {/* Quantity Selector */}
               <div>
-                <label className="block text-sm font-bold text-[#0F172A] mb-2.5 flex items-center gap-2">
-                  <LuShoppingBag className="text-[#0284C7]" size={17} />
+                <label className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-1.5 sm:gap-2">
+                  <LuShoppingBag className="text-[#0284C7]" size={16} />
                   <span>পরিমাণ নির্বাচন করুন</span>
                 </label>
-                <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-xs">
+                <div className="flex items-center justify-between gap-3 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-50 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-200 shadow-xs">
                     <button
                       type="button"
                       onClick={() => setOrderForm({ ...orderForm, quantity: Math.max(1, orderForm.quantity - 1) })}
                       disabled={orderForm.quantity <= 1}
-                      className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-sky-100 text-[#0284C7] disabled:opacity-30 disabled:hover:bg-slate-100 disabled:cursor-not-allowed transition-all cursor-pointer active:scale-95"
+                      className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-white hover:bg-sky-100 text-[#0284C7] disabled:opacity-30 disabled:hover:bg-white disabled:cursor-not-allowed transition-all cursor-pointer active:scale-95 shadow-2xs"
                       aria-label="পরিমাণ কমান"
                     >
-                      <LuMinus size={18} />
+                      <LuMinus size={16} />
                     </button>
-                    <div className="w-12 text-center">
-                      <span className="font-num text-xl font-extrabold text-[#0F172A]">
+                    <div className="w-10 sm:w-12 text-center">
+                      <span className="font-num text-lg sm:text-xl font-extrabold text-[#0F172A]">
                         {orderForm.quantity.toLocaleString('bn-BD')}
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => setOrderForm({ ...orderForm, quantity: orderForm.quantity + 1 })}
-                      className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-sky-100 text-[#0284C7] transition-all cursor-pointer active:scale-95"
+                      className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-white hover:bg-sky-100 text-[#0284C7] transition-all cursor-pointer active:scale-95 shadow-2xs"
                       aria-label="পরিমাণ বাড়ান"
                     >
-                      <LuPlus size={18} />
+                      <LuPlus size={16} />
                     </button>
                   </div>
 
                   <div className="text-right">
-                    <div className="text-xs text-[#64748B] font-medium">প্রোডাক্ট মূল্য</div>
-                    <div className="font-num text-lg font-black text-[#0284C7]">
+                    <div className="text-[11px] sm:text-xs text-[#64748B] font-medium">প্রোডাক্ট মূল্য</div>
+                    <div className="font-num text-base sm:text-lg font-black text-[#0284C7]">
                       ৳ {subtotal.toLocaleString('bn-BD')}
                     </div>
                   </div>
@@ -929,16 +984,16 @@ export default function LandingPage() {
 
               {/* Delivery Zone Selector */}
               <div>
-                <label className="block text-sm font-bold text-[#0F172A] mb-2.5 flex items-center gap-2">
-                  <LuTruck className="text-[#0284C7]" size={17} />
+                <label className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-1.5 sm:gap-2">
+                  <LuTruck className="text-[#0284C7]" size={16} />
                   <span>ডেলিভারি এলাকা নির্বাচন করুন</span>
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className={`p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_outside'
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_outside'
                     ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-slate-50 border-slate-200 text-[#475569]'
+                    : 'bg-white border-slate-200 text-[#475569]'
                     }`}>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <input
                         type="radio"
                         name="deliveryZone"
@@ -946,16 +1001,16 @@ export default function LandingPage() {
                         onChange={() => setOrderForm({ ...orderForm, deliveryZone: 'dhaka_outside' })}
                         className="accent-[#0284C7]"
                       />
-                      <span className="font-semibold text-sm">ঢাকা সিটির বাইরে</span>
+                      <span className="font-semibold text-xs sm:text-sm">ঢাকা সিটির বাইরে</span>
                     </div>
-                    <span className="font-num font-bold text-[#0284C7]">৳ ১৩০</span>
+                    <span className="font-num font-bold text-xs sm:text-sm text-[#0284C7]">৳ ১৩০</span>
                   </label>
 
-                  <label className={`p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_inside'
+                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_inside'
                     ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-slate-50 border-slate-200 text-[#475569]'
+                    : 'bg-white border-slate-200 text-[#475569]'
                     }`}>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <input
                         type="radio"
                         name="deliveryZone"
@@ -963,20 +1018,20 @@ export default function LandingPage() {
                         onChange={() => setOrderForm({ ...orderForm, deliveryZone: 'dhaka_inside' })}
                         className="accent-[#0284C7]"
                       />
-                      <span className="font-semibold text-sm">ঢাকা সিটির ভিতরে</span>
+                      <span className="font-semibold text-xs sm:text-sm">ঢাকা সিটির ভিতরে</span>
                     </div>
-                    <span className="font-num font-bold text-[#0284C7]">৳ ৭০</span>
+                    <span className="font-num font-bold text-xs sm:text-sm text-[#0284C7]">৳ ৭০</span>
                   </label>
                 </div>
               </div>
 
               {/* Live Order Bill Breakdown */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 text-sm">
+              <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-white border border-slate-200 space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                 <div className="flex justify-between items-center text-[#475569]">
-                  <span>ল্যাম্পের মূল্য ({orderForm.quantity.toLocaleString('bn-BD')} টি)</span>
-                  <div className="flex items-center gap-2 font-num">
+                  <span>ঘড়ির মূল্য ({orderForm.quantity.toLocaleString('bn-BD')} টি)</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 font-num">
                     <span className="text-[#0F172A] font-bold">৳ {subtotal.toLocaleString('bn-BD')}</span>
-                    <span className="text-xs text-[#94A3B8] line-through font-semibold">
+                    <span className="text-[10px] sm:text-xs text-[#94A3B8] line-through font-semibold">
                       ৳ {(orderForm.quantity * regularPrice).toLocaleString('bn-BD')}
                     </span>
                   </div>
@@ -992,14 +1047,14 @@ export default function LandingPage() {
                   <span className="font-num">- ৳ {totalSavings.toLocaleString('bn-BD')}</span>
                 </div>
 
-                <div className="flex justify-between text-base sm:text-lg font-black text-[#0F172A] pt-2.5 border-t border-slate-200">
+                <div className="flex justify-between text-sm sm:text-lg font-black text-[#0F172A] pt-2 sm:pt-2.5 border-t border-slate-200">
                   <span>সর্বমোট বিল</span>
-                  <span className="font-num text-xl sm:text-2xl text-[#0284C7]">
+                  <span className="font-num text-lg sm:text-2xl text-[#0284C7]">
                     ৳ {totalAmount.toLocaleString('bn-BD')}
                   </span>
                 </div>
 
-                <div className="text-[11px] text-[#64748B] text-center pt-1">
+                <div className="text-[10px] sm:text-[11px] text-[#64748B] text-center pt-0.5 sm:pt-1">
                   পণ্য হাতে পেয়ে ডেলিভারিম্যানের কাছে সম্পূর্ণ টাকা পরিশোধ করবেন (ক্যাশ অন ডেলিভারি)
                 </div>
               </div>
@@ -1008,19 +1063,21 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-extrabold text-lg sm:text-xl shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer text-center disabled:opacity-75 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 sm:gap-2.5 w-full py-3.5 sm:py-4 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-extrabold text-base sm:text-xl shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer text-center disabled:opacity-75 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
                     <span>অর্ডার প্রক্রিয়াকরণ হচ্ছে...</span>
                   </>
                 ) : (
                   <>
-                    <LuShoppingBag size={22} />
-                    <span className="sm:hidden">অর্ডার কনফার্ম করুন</span>
-                    <span className="hidden sm:inline">
-                      অর্ডার কনফার্ম করুন (সর্বমোট বিল: ৳ {totalAmount.toLocaleString('bn-BD')})
+                    <LuShoppingBag size={20} className="shrink-0" />
+                    <span className="flex items-center justify-center gap-1.5 sm:gap-2 text-center">
+                      <span>অর্ডার কনফার্ম করুন</span>
+                      <span className="font-num font-black text-sky-100">
+                        ৳ {totalAmount.toLocaleString('bn-BD')}
+                      </span>
                     </span>
                   </>
                 )}
@@ -1036,29 +1093,29 @@ export default function LandingPage() {
       {/* ==================================================
           FAQ SECTION
           ================================================== */}
-      <section id="faq" className="py-16 md:py-24 border-t border-slate-200/80 bg-white">
+      <section id="faq" className="py-12 md:py-16 border-t border-slate-200/80 bg-[#F8FAFC]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <div className="text-center mb-10 sm:mb-14">
-            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-2">
+          <div className="text-center mb-8 sm:mb-12">
+            <span className="text-xs tracking-widest text-[#0284C7] uppercase font-bold block mb-3 sm:mb-3.5">
               সচরাচর প্রশ্নাবলী
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold text-[#0F172A] tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-bold text-[#0F172A] tracking-tight">
               সচরাচর জিজ্ঞাসিত প্রশ্নাবলী
             </h2>
             <div className="small-design-line" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3.5 sm:space-y-4">
             {faqItems.map((item, index) => (
               <div
                 key={index}
-                className="rounded-2xl light-card overflow-hidden transition-colors hover:border-sky-300"
+                className="rounded-2xl light-card overflow-hidden transition-colors hover:border-sky-300 bg-white"
               >
                 <button
                   type="button"
                   onClick={() => setActiveFaq(activeFaq === index ? null : index)}
-                  className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer"
+                  className="w-full p-4 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer"
                 >
                   <span className="font-bold text-base sm:text-lg text-[#0F172A]">
                     {item.q}
@@ -1070,7 +1127,7 @@ export default function LandingPage() {
                   />
                 </button>
                 {activeFaq === index && (
-                  <div className="px-5 sm:px-6 pb-6 text-sm sm:text-base text-[#475569] leading-relaxed border-t border-slate-100 pt-4 font-normal">
+                  <div className="px-4 sm:px-6 pb-5 sm:pb-6 text-xs sm:text-base text-[#475569] leading-relaxed border-t border-slate-100 pt-3 sm:pt-4 font-normal">
                     {item.a}
                   </div>
                 )}
@@ -1085,14 +1142,14 @@ export default function LandingPage() {
       {/* ==================================================
           FINAL CTA SECTION
           ================================================== */}
-      <section className="py-20 md:py-28 text-center relative overflow-hidden bg-[#F8FAFC] border-t border-slate-200/80">
+      <section className="py-14 md:py-20 text-center relative overflow-hidden bg-white border-t border-slate-200/80">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <h2 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#0F172A] leading-tight mb-4">
-            পড়ার টেবিলে <br className="hidden sm:inline" />
-            <span className="text-[#0284C7]">মহাকাশের নতুন গল্প</span>
+            সাধারণ ঘড়ির ভিড়ে <br className="hidden sm:inline" />
+            <span className="text-[#0284C7]">আপনার লুক হোক আলাদা</span>
           </h2>
           <p className="text-base sm:text-lg text-[#475569] max-w-xl mx-auto mb-6 font-normal">
-            আপনার সোনামণির জন্য কিউট, ব্যবহারিক ও আকর্ষণীয় একটি ডেস্ক সঙ্গী।
+            আলোর প্রতিফলনে বদলে যাওয়া আকর্ষণীয় ডায়াল—আপনার প্রতিদিনের স্টাইলে যোগ করুক নতুন মাত্রা।
           </p>
           <div className="small-design-line" />
           <button
@@ -1109,19 +1166,19 @@ export default function LandingPage() {
       {/* ==================================================
           FOOTER
           ================================================== */}
-      <footer className="py-12 border-t border-slate-200 text-xs text-[#64748B] bg-white">
+      <footer className="py-12 border-t border-slate-200 text-xs text-[#64748B] bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <div className="font-en text-base font-extrabold text-[#0F172A] tracking-wider mb-0.5">
-                ASTRONAUT <span className="text-[#0284C7]">2-in-1</span>
+                CHARLES DELON
               </div>
-              <p className="text-xs text-[#64748B] font-bn font-medium">অ্যালার্ম ও ল্যাম্প</p>
+              <p className="text-xs text-[#64748B] font-bn font-medium">কালার চেঞ্জিং ডায়াল ঘড়ি</p>
             </div>
 
             <a
-              href="https://wa.me/8801746867350?text=Hello%2C%20I%20want%20to%20know%20about%20Astronaut%20Reading%20Lamp"
+              href="https://wa.me/8801746867350?text=Hello%2C%20I%20want%20to%20know%20about%20Charles%20Delon%20Color-Changing%20Watch"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 text-emerald-700 transition-colors cursor-pointer"
@@ -1131,7 +1188,7 @@ export default function LandingPage() {
             </a>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-slate-200">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-5 sm:gap-6 text-sm text-[#475569]">
               <button onClick={() => scrollToSection('benefits')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
                 মূল সুবিধা
@@ -1142,8 +1199,8 @@ export default function LandingPage() {
               <button onClick={() => scrollToSection('features')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
                 ফিচার্স
               </button>
-              <button onClick={() => scrollToSection('offer')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
-                অফার
+              <button onClick={() => scrollToSection('gift')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
+                উপহার দিন
               </button>
               <button onClick={() => scrollToSection('order-form')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
                 অর্ডার ফর্ম
@@ -1164,7 +1221,7 @@ export default function LandingPage() {
             </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#94A3B8] pt-4 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#94A3B8] pt-4 border-t border-slate-200">
             <div>
               সরাসরি যোগাযোগ ও সহায়তা: <span className="font-en text-[#0F172A] font-semibold">+8801746867350</span>
             </div>
@@ -1178,28 +1235,18 @@ export default function LandingPage() {
 
 
       {/* ==================================================
-          FLOATING SCROLL TO TOP BUTTON
-          ================================================== */}
-      {showScrollTop && (
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-36 md:bottom-24 right-4 sm:right-6 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white hover:bg-slate-50 text-[#0284C7] border border-slate-200 shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer group animate-in fade-in"
-          aria-label="উপরে চলে যান"
-          title="উপরে চলে যান"
-        >
-          <LuArrowUp size={20} className="group-hover:-translate-y-0.5 transition-transform" />
-        </button>
-      )}
-
-
-      {/* ==================================================
           MOBILE FLOATING PURCHASE BAR
           ================================================== */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 border-t border-slate-200 backdrop-blur-xl px-4 py-3 safe-bottom shadow-[0_-8px_25px_rgba(0,0,0,0.08)]">
+      <div
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 border-t border-slate-200 backdrop-blur-xl px-4 py-3 safe-bottom shadow-[0_-8px_25px_rgba(0,0,0,0.08)] transition-all duration-300 ease-in-out ${showMobileFloatingBar
+            ? 'translate-y-0 opacity-100 pointer-events-auto'
+            : 'translate-y-full opacity-0 pointer-events-none'
+          }`}
+      >
         <div className="flex items-center justify-between gap-3">
           <div>
-            <span className="text-[10px] text-[#64748B] block font-medium">বিশেষ অফার</span>
-            <span className="font-num text-xl font-black text-[#0284C7]">৳ ৮৩০</span>
+            <span className="text-[10px] font-bold text-emerald-600 block">৪০০ টাকা ছাড়</span>
+            <span className="font-num text-xl font-black text-[#0284C7]">৳ ৮৯০</span>
           </div>
           <button
             onClick={() => scrollToSection('order-form')}

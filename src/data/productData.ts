@@ -1,43 +1,43 @@
-import spaceBlueImg from '../assets/astronaut_clock.jpg';
-import cuteOrangeImg from '../assets/clock_lamp.jpg';
-import snowWhiteImg from '../assets/white_clock.jpg';
+import blackWatchImg from '../assets/blackwatch.webp';
+import blueWatchImg from '../assets/blue_watch.webp';
+import grayWatchImg from '../assets/gray_watch.webp';
 
 import type { ProductColor } from '../types';
 
 export const PRODUCT_INFO = {
-  name: "2-in-1 Astronaut Reading Lamp & Alarm Clock",
-  nameBangla: "২-ইন-১ অ্যাস্ট্রোনাট রিডিং ল্যাম্প ও অ্যালার্ম ঘড়ি",
-  tagline: "পড়ার টেবিলে মহাকাশের ছোঁয়া",
-  regularPrice: 1150,
-  basePrice: 830,
+  name: "Charles Delon Color-Changing Dial Watch",
+  nameBangla: "চার্লস ডেলন কালার চেঞ্জিং ডায়াল ওয়াচ",
+  tagline: "আলো পড়লেই রঙ বদলায়! সাধারণ ঘড়ির ভিড়ে আপনার লুক হোক আলাদা",
+  regularPrice: 1290,
+  basePrice: 890,
   deliveryDhaka: 70,
   deliveryOutside: 130,
 };
 
 export const COLOR_VARIANTS: ProductColor[] = [
   {
+    id: "black",
+    name: "ব্ল্যাক স্ট্র্যাপ (Black Strap)",
+    nameEn: "Black Strap",
+    hex: "#0F172A",
+    badgeBg: "bg-slate-100 text-slate-800 border-slate-300",
+    image: blackWatchImg,
+  },
+  {
     id: "blue",
-    name: "স্পেস ব্লু (Space Blue)",
-    nameEn: "Space Blue",
-    hex: "#0284C7",
+    name: "ব্লু স্ট্র্যাপ (Blue Strap)",
+    nameEn: "Blue Strap",
+    hex: "#2563EB",
     badgeBg: "bg-sky-100 text-sky-800 border-sky-200",
-    image: spaceBlueImg,
+    image: blueWatchImg,
   },
   {
-    id: "orange",
-    name: "কিউট অরেঞ্জ (Cute Orange)",
-    nameEn: "Cute Orange",
-    hex: "#EA580C",
-    badgeBg: "bg-orange-100 text-orange-800 border-orange-200",
-    image: cuteOrangeImg,
-  },
-  {
-    id: "white",
-    name: "স্নো হোয়াইট (Snow White)",
-    nameEn: "Snow White",
-    hex: "#E2E8F0",
-    badgeBg: "bg-slate-100 text-slate-800 border-slate-200",
-    image: snowWhiteImg,
+    id: "gray",
+    name: "গ্রে স্ট্র্যাপ (Gray Strap)",
+    nameEn: "Gray Strap",
+    hex: "#64748B",
+    badgeBg: "bg-slate-100 text-slate-700 border-slate-200",
+    image: grayWatchImg,
   },
 ];
 
