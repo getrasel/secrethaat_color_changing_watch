@@ -42,7 +42,7 @@ export default function LandingPage() {
     name: '',
     phone: '',
     address: '',
-    variant: 'ব্ল্যাক স্ট্র্যাপ (Black Strap)',
+    variant: 'ব্ল্যাক (Black)',
     quantity: 1,
     deliveryZone: 'dhaka_outside' // 'dhaka_outside' (130) or 'dhaka_inside' (70)
   });
@@ -882,61 +882,61 @@ export default function LandingPage() {
               <div>
                 <label className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-1.5 sm:gap-2">
                   <LuPalette className="text-[#0284C7]" size={16} />
-                  <span>পছন্দের স্ট্র্যাপ কালার নির্বাচন করুন</span>
+                  <span>পছন্দের কালার নির্বাচন করুন</span>
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-                  {/* Black Strap */}
-                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('ব্ল্যাক')
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
+                  {/* Black */}
+                  <label className={`p-2 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('ব্ল্যাক')
                     ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
                     : 'bg-white border-slate-200 text-[#475569]'
                     }`}>
-                    <div className="flex items-center gap-2 sm:gap-2.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
                       <input
                         type="radio"
                         name="colorVariant"
                         checked={orderForm.variant.includes('ব্ল্যাক')}
-                        onChange={() => setOrderForm({ ...orderForm, variant: 'ব্ল্যাক স্ট্র্যাপ (Black Strap)' })}
-                        className="accent-[#0284C7]"
+                        onChange={() => setOrderForm({ ...orderForm, variant: 'ব্ল্যাক (Black)' })}
+                        className="accent-[#0284C7] shrink-0"
                       />
-                      <span className="font-semibold text-xs sm:text-sm">ব্ল্যাক স্ট্র্যাপ</span>
+                      <span className="font-semibold text-xs sm:text-sm truncate">ব্ল্যাক</span>
                     </div>
-                    <div className="w-3.5 h-3.5 rounded-full bg-slate-900 border border-white shrink-0" />
+                    <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-slate-900 border border-white shrink-0 ml-1" />
                   </label>
 
-                  {/* Blue Strap */}
-                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('ব্লু')
+                  {/* Blue */}
+                  <label className={`p-2 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('ব্লু')
                     ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
                     : 'bg-white border-slate-200 text-[#475569]'
                     }`}>
-                    <div className="flex items-center gap-2 sm:gap-2.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
                       <input
                         type="radio"
                         name="colorVariant"
                         checked={orderForm.variant.includes('ব্লু')}
-                        onChange={() => setOrderForm({ ...orderForm, variant: 'ব্লু স্ট্র্যাপ (Blue Strap)' })}
-                        className="accent-[#0284C7]"
+                        onChange={() => setOrderForm({ ...orderForm, variant: 'ব্লু (Blue)' })}
+                        className="accent-[#0284C7] shrink-0"
                       />
-                      <span className="font-semibold text-xs sm:text-sm">ব্লু স্ট্র্যাপ</span>
+                      <span className="font-semibold text-xs sm:text-sm truncate">ব্লু</span>
                     </div>
-                    <div className="w-3.5 h-3.5 rounded-full bg-blue-600 border border-white shrink-0" />
+                    <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-blue-600 border border-white shrink-0 ml-1" />
                   </label>
 
-                  {/* Gray Strap */}
-                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('গ্রে')
+                  {/* Gray */}
+                  <label className={`p-2 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('গ্রে')
                     ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
                     : 'bg-white border-slate-200 text-[#475569]'
                     }`}>
-                    <div className="flex items-center gap-2 sm:gap-2.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
                       <input
                         type="radio"
                         name="colorVariant"
                         checked={orderForm.variant.includes('গ্রে')}
-                        onChange={() => setOrderForm({ ...orderForm, variant: 'গ্রে স্ট্র্যাপ (Gray Strap)' })}
-                        className="accent-[#0284C7]"
+                        onChange={() => setOrderForm({ ...orderForm, variant: 'গ্রে (Gray)' })}
+                        className="accent-[#0284C7] shrink-0"
                       />
-                      <span className="font-semibold text-xs sm:text-sm">গ্রে স্ট্র্যাপ</span>
+                      <span className="font-semibold text-xs sm:text-sm truncate">গ্রে</span>
                     </div>
-                    <div className="w-3.5 h-3.5 rounded-full bg-slate-500 border border-white shrink-0" />
+                    <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-slate-500 border border-white shrink-0 ml-1" />
                   </label>
                 </div>
               </div>
