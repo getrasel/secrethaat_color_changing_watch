@@ -143,12 +143,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       name: `গ্রাহক ${randomSuffix}`,
       phone: `017${Math.floor(10000000 + Math.random() * 90000000)}`,
       address: "হাউজ ২৫, ধানমন্ডি, ঢাকা",
-      product: "2-in-1 Rechargeable Double Light Torch & Reading Lamp",
-      color: randomSuffix % 2 === 0 ? "ক্ল্যাসিক ব্ল্যাক" : "এমারেল্ড গ্রিন",
-      quantity: 1,
-      price: 720,
-      shipping_amount: 70,
-      total_amount: 790,
+      product: "Charles Delon Color-Changing Dial Watch",
+      color: randomSuffix % 2 === 0 ? "১ম: ব্ল্যাক, ২য়: ব্লু" : "ব্ল্যাক (Black)",
+      quantity: randomSuffix % 2 === 0 ? 2 : 1,
+      price: 840,
+      shipping_amount: 100,
+      total_amount: (randomSuffix % 2 === 0 ? 2 : 1) * 840 + 100,
       status: "pending",
     };
 
@@ -177,7 +177,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         : total;
     const itemTotal = unitPrice * qty;
 
-    const info = `অর্ডার #${ord.id}\nনাম: ${ord.name}\nফোন: ${ord.phone}\nঠিকানা: ${ord.address}\nপণ্য: ${ord.product || "2-in-1 Torch & Lamp"} (${ord.color || "ক্ল্যাসিক ব্ল্যাক"})\nপরিমাণ: ${qty} টি\nমূল্য: ৳${unitPrice} x ${qty} = ৳${itemTotal}\nডেলিভারি: ৳${shipping}\nসর্বমোট: ৳${total}`;
+    const info = `অর্ডার #${ord.id}\nনাম: ${ord.name}\nফোন: ${ord.phone}\nঠিকানা: ${ord.address}\nপণ্য: ${ord.product || "Charles Delon Watch"} (${ord.color || "ব্ল্যাক (Black)"})\nপরিমাণ: ${qty} টি\nমূল্য: ৳${unitPrice} x ${qty} = ৳${itemTotal}\nডেলিভারি: ৳${shipping}\nসর্বমোট: ৳${total}`;
 
     navigator.clipboard.writeText(info);
     setCopiedId(ord.id);
@@ -531,11 +531,11 @@ with check (true);`}
                       : rawPhone;
 
                     const shippingAmount = ord.shipping_amount ?? 0;
-                    const isDhaka = shippingAmount === 70;
-                    const isOutside = shippingAmount === 130;
-                    const shippingLabel = isDhaka
+                    const shippingLabel = shippingAmount === 100
+                      ? "সারা দেশ"
+                      : shippingAmount === 70
                       ? "ঢাকার ভেতরে"
-                      : isOutside
+                      : shippingAmount === 130
                       ? "ঢাকার বাইরে"
                       : shippingAmount === 0
                       ? "ফ্রি ডেলিভারি"
@@ -572,7 +572,7 @@ with check (true);`}
                             {waPhone && (
                               <a
                                 href={`https://wa.me/${waPhone}?text=${encodeURIComponent(
-                                  `আসসালামু আলাইকুম ${ord.name}, 2-in-1 Rechargeable Double Light Torch & Reading Lamp অর্ডার করার জন্য ধন্যবাদ।`
+                                  `আসসালামু আলাইকুম ${ord.name}, Charles Delon Color-Changing Dial Watch অর্ডার করার জন্য ধন্যবাদ। আপনার অর্ডারটি কনফার্ম করতে যোগাযোগ করছি।`
                                 )}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -586,7 +586,7 @@ with check (true);`}
                         </td>
                         <td className="py-4 px-4">
                           <div className="font-semibold text-slate-200 text-xs">
-                            {ord.product || "2-in-1 Torch & Lamp"}
+                            {ord.product || "Charles Delon Watch"}
                           </div>
                           {ord.color && (
                             <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-900 border border-slate-700 text-indigo-300 font-medium">
@@ -702,7 +702,7 @@ with check (true);`}
                   পণ্য ও ডেলিভারি বিবরণ
                 </div>
                 <div><strong className="text-white">পণ্য:</strong> {selectedOrder.product}</div>
-                <div><strong className="text-white">কালার:</strong> {selectedOrder.color || "কিউট ইয়েলো"}</div>
+                <div><strong className="text-white">কালার:</strong> {selectedOrder.color || "ব্ল্যাক (Black)"}</div>
                 <div><strong className="text-white">পরিমাণ:</strong> {selectedOrder.quantity || 1} টি</div>
                 <div>
                   <strong className="text-white">একক মূল্য:</strong> ৳ {
@@ -715,7 +715,9 @@ with check (true);`}
                 </div>
                 <div>
                   <strong className="text-white">ডেলিভারি চার্জ:</strong> ৳ {selectedOrder.shipping_amount ?? 0}
-                  {selectedOrder.shipping_amount === 70
+                  {selectedOrder.shipping_amount === 100
+                    ? " (সারা দেশ)"
+                    : selectedOrder.shipping_amount === 70
                     ? " (ঢাকার ভেতরে)"
                     : selectedOrder.shipping_amount === 130
                     ? " (ঢাকার বাইরে)"

@@ -38,20 +38,29 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ src: string; title: string; badge: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [orderForm, setOrderForm] = useState({
+  const [orderForm, setOrderForm] = useState<{
+    name: string;
+    phone: string;
+    address: string;
+    variant: string;
+    selectedColors: string[];
+    quantity: number;
+    deliveryZone: string;
+  }>({
     name: '',
     phone: '',
     address: '',
     variant: 'ব্ল্যাক (Black)',
+    selectedColors: ['ব্ল্যাক (Black)'],
     quantity: 1,
-    deliveryZone: 'dhaka_outside' // 'dhaka_outside' (130) or 'dhaka_inside' (70)
+    deliveryZone: 'nationwide' // সারা দেশে ১০০ টাকা
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [showMobileFloatingBar, setShowMobileFloatingBar] = useState(false);
 
   useEffect(() => {
-    document.title = 'Charles Delon Color-Changing Watch | আলো পড়লেই রঙ বদলায়! আপনার লুক হোক আলাদা';
+    document.title = 'Charles Delon Color-Changing Watch | কাঁটা ঘোরলেই রঙ বদলায়! আপনার লুক হোক আলাদা';
 
     // Hash scrolling if landed with #order-form or similar
     if (window.location.hash) {
@@ -95,11 +104,10 @@ export default function LandingPage() {
 
   // Pricing configuration
   const regularPrice = 1290;
-  const offerPrice = 890;
-  const deliveryCharge = orderForm.deliveryZone === 'dhaka_inside' ? 70 : 130;
+  const offerPrice = 840;
+  const deliveryCharge = 100; // সারা দেশে ডেলিভারি চার্জ ১০০ টাকা
   const subtotal = orderForm.quantity * offerPrice;
   const totalAmount = subtotal + deliveryCharge;
-  const totalSavings = (orderForm.quantity * regularPrice) - subtotal;
 
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
@@ -107,6 +115,60 @@ export default function LandingPage() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const getOrdinalBangla = (index: number): string => {
+    const ordinals = ['১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম'];
+    return ordinals[index] || `${index + 1}তম`;
+  };
+
+  const toBanglaNum = (num: number | string): string => {
+    const banglaDigits: { [key: string]: string } = {
+      '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪',
+      '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯',
+    };
+    return String(num).replace(/[0-9]/g, (match) => banglaDigits[match] || match);
+  };
+
+  const COLOR_OPTIONS = [
+    { id: 'black', label: 'ব্ল্যাক', fullName: 'ব্ল্যাক (Black)', dotBg: 'bg-slate-900' },
+    { id: 'blue', label: 'ব্লু', fullName: 'ব্লু (Blue)', dotBg: 'bg-blue-600' },
+    { id: 'gray', label: 'গ্রে', fullName: 'গ্রে (Gray)', dotBg: 'bg-slate-500' },
+  ];
+
+  const handleQuantityChange = (newQty: number) => {
+    const qty = Math.max(1, newQty);
+    const newColors = [...orderForm.selectedColors];
+
+    while (newColors.length < qty) {
+      newColors.push('ব্ল্যাক (Black)');
+    }
+
+    const trimmedColors = newColors.slice(0, qty);
+    const variantString = trimmedColors.length === 1
+      ? trimmedColors[0]
+      : trimmedColors.map((c, idx) => `${getOrdinalBangla(idx)}: ${c.split(' ')[0]}`).join(', ');
+
+    setOrderForm(prev => ({
+      ...prev,
+      quantity: qty,
+      selectedColors: trimmedColors,
+      variant: variantString
+    }));
+  };
+
+  const handleColorChange = (index: number, colorFullName: string) => {
+    const newColors = [...orderForm.selectedColors];
+    newColors[index] = colorFullName;
+    const variantString = newColors.length === 1
+      ? newColors[0]
+      : newColors.map((c, idx) => `${getOrdinalBangla(idx)}: ${c.split(' ')[0]}`).join(', ');
+
+    setOrderForm(prev => ({
+      ...prev,
+      selectedColors: newColors,
+      variant: variantString
+    }));
   };
 
   const handleOrderSubmit = async (e: React.FormEvent) => {
@@ -222,7 +284,7 @@ export default function LandingPage() {
   const faqItems = [
     {
       q: '১. ঘড়িটির ডায়াল কি সত্যিই রঙ পরিবর্তন করে?',
-      a: 'আলোর প্রতিফলন ও আলোর পরিবর্তনের কারণে ডায়ালের গ্রেডিয়েন্ট রঙের শেড ভিন্নভাবে দেখা যায়।'
+      a: 'ঘড়ির কাঁটা ঘোরার সাথে সাথে ডায়ালের আকর্ষণীয় রঙের শেড চমৎকারভাবে পরিবর্তিত হয়ে নতুন রূপ নেয়।'
     },
     {
       q: '২. এটি কি ছেলে ও মেয়ে উভয়েই ব্যবহার করতে পারবে?',
@@ -266,6 +328,9 @@ export default function LandingPage() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-[#475569]">
+            <button onClick={() => scrollToSection('gift')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
+              উপহার দিন
+            </button>
             <button onClick={() => scrollToSection('benefits')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
               মূল সুবিধা
             </button>
@@ -274,9 +339,6 @@ export default function LandingPage() {
             </button>
             <button onClick={() => scrollToSection('features')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
               ফিচার্স
-            </button>
-            <button onClick={() => scrollToSection('gift')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
-              উপহার দিন
             </button>
             <button onClick={() => scrollToSection('faq')} className="hover:text-[#0284C7] transition-colors cursor-pointer">
               প্রশ্নোত্তর
@@ -315,6 +377,9 @@ export default function LandingPage() {
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-white/95 border-b border-slate-200 px-5 py-5 space-y-3 backdrop-blur-2xl shadow-xl">
+            <button onClick={() => scrollToSection('gift')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7] border-b border-slate-100">
+              উপহার দিন
+            </button>
             <button onClick={() => scrollToSection('benefits')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7] border-b border-slate-100">
               মূল সুবিধা
             </button>
@@ -323,9 +388,6 @@ export default function LandingPage() {
             </button>
             <button onClick={() => scrollToSection('features')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7] border-b border-slate-100">
               ফিচার্স
-            </button>
-            <button onClick={() => scrollToSection('gift')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7] border-b border-slate-100">
-              উপহার দিন
             </button>
             <button onClick={() => scrollToSection('faq')} className="block w-full text-left py-2 text-base font-semibold text-[#334155] hover:text-[#0284C7]">
               প্রশ্নোত্তর
@@ -359,7 +421,7 @@ export default function LandingPage() {
 
               {/* Headline */}
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] xl:text-[2.85rem] font-bold tracking-tight text-[#0F172A] leading-[1.3] mb-4 md:mb-5 font-bn">
-                আলো পড়লেই রঙ বদলায়! <br className="hidden sm:inline" />
+                কাঁটা ঘোরলেই রঙ বদলায়! <br className="hidden sm:inline" />
                 <span className="bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#2563EB] bg-clip-text text-transparent">
                   সাধারণ ঘড়ির ভিড়ে আপনার লুক হোক আলাদা
                 </span>
@@ -367,19 +429,19 @@ export default function LandingPage() {
 
               {/* Subtitle */}
               <p className="text-base sm:text-lg md:text-xl text-[#475569] leading-relaxed mb-6 font-normal">
-                সাধারণ ঘড়ির বাইরে, আলোর প্রতিফলনে রঙ বদলানো নজরকাড়া ডায়াল আর স্টাইলিশ ডিজাইনে প্রতিটি মুহূর্তে আপনার লুকে যোগ করবে আলাদা আকর্ষণ।
+                সাধারণ ঘড়ির বাইরে, কাঁটা ঘোরার সাথে সাথে রঙ বদলানো নজরকাড়া ডায়াল আর স্টাইলিশ ডিজাইনে প্রতিটি মুহূর্তে আপনার লুকে যোগ করবে আলাদা আকর্ষণ।
               </p>
 
               {/* Price / Offer Display */}
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-4xl sm:text-5xl font-black text-[#0284C7] font-num tracking-tight">
-                  ৳ ৮৯০
+                  ৳ ৮৪০
                 </span>
                 <span className="text-xl sm:text-2xl text-[#94A3B8] line-through font-num font-semibold">
                   ৳ ১,২৯০
                 </span>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-100 text-[#0284C7] ml-2">
-                  (৳ ৪০০ ছাড়)
+                  (৳ ৪৫০ ছাড়)
                 </span>
               </div>
 
@@ -403,17 +465,10 @@ export default function LandingPage() {
                 </a>
               </div>
 
-              {/* Trust Badges & Supporting Text */}
-              <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-[#475569] font-medium">
-                <span className="flex items-center gap-1.5 sm:gap-2 text-[#0284C7] font-semibold bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">
-                  <LuSparkles size={16} /> ছেলে-মেয়ে সবার জন্য উপযোগী
-                </span>
-                <span className="flex items-center gap-1.5 sm:gap-2">
-                  <LuTruck className="text-[#0284C7]" size={18} /> সারা দেশে হোম ডেলিভারি
-                </span>
-                <span className="flex items-center gap-1.5 sm:gap-2">
-                  <LuShieldCheck className="text-[#0284C7]" size={18} /> ক্যাশ অন ডেলিভারি
-                </span>
+              {/* Cash on Delivery Highlight */}
+              <div className="flex items-center gap-2.5 text-base sm:text-lg md:text-xl font-bold text-[#0F172A]">
+                <LuTruck className="text-[#0284C7] shrink-0" size={24} />
+                <span>সারা বাংলাদেশে ক্যাশ অন ডেলিভারি সুবিধা</span>
               </div>
             </div>
 
@@ -448,6 +503,108 @@ export default function LandingPage() {
 
 
       {/* ==================================================
+          DELIVERY PACKAGE & GIFT BOX
+          ================================================== */}
+      <section id="gift" className="py-10 md:py-14 bg-[#F8FAFC] border-t border-slate-200/80 scroll-mt-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* Main Card Box */}
+          <div className="p-6 sm:p-10 md:p-12 rounded-3xl light-card border-sky-200 shadow-xl relative overflow-hidden bg-white">
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+
+              {/* Left Side: Gift & Self Purchase Story + Pricing + CTA */}
+              <div className="lg:col-span-7 text-center lg:text-left">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-[#0284C7] text-xs font-bold uppercase tracking-wider mb-4 sm:mb-4.5">
+                  <LuGift size={14} />
+                  <span>উপহারের জন্য চমৎকার পছন্দ</span>
+                </div>
+
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0F172A] mb-3 tracking-tight leading-snug">
+                  নিজের জন্য, কিংবা প্রিয় কারও জন্য
+                </h3>
+
+                <p className="text-sm sm:text-base md:text-lg text-[#475569] max-w-xl mx-auto lg:mx-0 mb-6 leading-relaxed font-normal">
+                  বিশেষ কাউকে খুশি করতে সবসময় বড় কিছু প্রয়োজন হয় না। কাঁটা ঘোরার সাথে সাথে রঙ বদলানো একটি সুন্দর ও স্টাইলিশ ঘড়িও হতে পারে মনে রাখার মতো একটি সেরা উপহার।
+                </p>
+
+                {/* Action CTA */}
+                <div>
+                  <button
+                    onClick={() => scrollToSection('order-form')}
+                    className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-extrabold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                  >
+                    <LuGift size={21} />
+                    <span>উপহার দিতে অর্ডার করুন</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Side: Delivery Package List Box */}
+              <div className="lg:col-span-5">
+                <div className="p-6 sm:p-7 rounded-2xl bg-slate-50 border-2 border-sky-200 shadow-md flex flex-col justify-between text-left">
+
+                  {/* Header */}
+                  <div className="flex items-center gap-2.5 pb-4 border-b border-slate-200 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0">
+                      <LuPackageCheck size={22} />
+                    </div>
+                    <div>
+                      <h4 className="text-lg sm:text-xl font-bold text-[#0F172A]">
+                        ডেলিভারিতে যা যা পাচ্ছেনঃ
+                      </h4>
+                      <p className="text-xs text-[#64748B]">অরিজিনাল প্যাকেজ বক্স সেট</p>
+                    </div>
+                  </div>
+
+                  {/* List Items */}
+                  <ul className="space-y-3 mb-5">
+                    <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                      <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
+                      <span className="text-sm sm:text-base font-bold text-[#0F172A]">
+                        চার্লস ডেলন কালার চেঞ্জিং ওয়াচ
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                      <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
+                      <span className="text-sm sm:text-base font-bold text-[#0F172A]">
+                        আকর্ষণীয় অফিশিয়াল বক্স প্যাকেজিং
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                      <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
+                      <span className="text-sm sm:text-base font-bold text-[#0F172A]">
+                        ১টি এক্সট্রা ব্যাটারি (ফ্রি)
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                      <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
+                      <span className="text-sm sm:text-base font-bold text-[#0F172A]">
+                        ১টি লটারি টিকিট
+                      </span>
+                    </li>
+                  </ul>
+
+                  {/* Note box */}
+                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center text-xs sm:text-sm text-emerald-800 font-bold flex items-center justify-center gap-2">
+                    <LuShieldCheck size={17} className="text-emerald-600 shrink-0" />
+                    <span>note: পণ্য হাতে পেয়ে টাকা দিবেন</span>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+
+
+
+      {/* ==================================================
           4 CORE BENEFITS (4 Cards Grid)
           ================================================== */}
       <section id="benefits" className="py-12 md:py-16 border-t border-slate-200/80 bg-white relative overflow-hidden">
@@ -470,10 +627,10 @@ export default function LandingPage() {
                 ০১
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2">
-                আলোতে বদলায় রঙ
+                কাঁটা ঘোরার সাথে বদলায় রঙ
               </h3>
               <p className="text-[#475569] text-xs sm:text-sm leading-relaxed font-normal">
-                আলোর প্রতিফলনে ডায়ালের গ্রেডিয়েন্ট শেড ভিন্নভাবে ফুটে ওঠে, যা ঘড়িটিকে দেয় আলাদা এক আকর্ষণ।
+                ঘড়ির কাঁটা ঘোরার সাথে সাথে ডায়ালের রঙ বদলে যায়, যা ঘড়িটিকে দেয় আলাদা এক আকর্ষণ।
               </p>
             </div>
 
@@ -496,10 +653,10 @@ export default function LandingPage() {
                 ০৩
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2">
-                সব পোশাকের সাথে মানানসই
+                সিলিকন বা রাবারের বেল্ট
               </h3>
               <p className="text-[#475569] text-xs sm:text-sm leading-relaxed font-normal">
-                ক্যাজুয়াল ও ফর্মাল যেকোনো পোশাকের সাথেই নিখুঁতভাবে মানিয়ে যায় এবং ছেলে-মেয়ে উভয়ের জন্য উপযোগী।
+                উচ্চমানের সিলিকন বা রাবার দিয়ে তৈরি বেল্ট, যা পানিতে ভিজলেও কোনো সমস্যা নেই এবং সহজে নষ্ট হয় না।
               </p>
             </div>
 
@@ -509,10 +666,10 @@ export default function LandingPage() {
                 ০৪
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2">
-                সারাদিন আরামদায়ক
+                মজবুত মেটাল বডি
               </h3>
               <p className="text-[#475569] text-xs sm:text-sm leading-relaxed font-normal">
-                নরম রাবার/সিলিকন স্ট্র্যাপ হাতে আরামদায়ক অনুভূতি দেয় এবং দীর্ঘক্ষণ ব্যবহারের জন্য অত্যন্ত সুবিধাজনক।
+                সহজে কোনো জং বা মরিচা ধরবে না, প্রিমিয়াম মেটালে তৈরি অত্যন্ত শক্ত ও মজবুত ঘড়ি।
               </p>
             </div>
           </div>
@@ -559,7 +716,7 @@ export default function LandingPage() {
               },
               {
                 src: watchBlackSplashImg,
-                title: 'আলোর প্রতিফলনে ডায়ালে লুকিয়ে থাকা রঙের ম্যাজিক',
+                title: 'কাঁটা ঘোরার সাথে সাথে ডায়ালে লুকিয়ে থাকা রঙের ম্যাজিক',
                 badge: 'ম্যাজিকাল ডায়াল'
               },
               {
@@ -695,99 +852,6 @@ export default function LandingPage() {
 
 
       {/* ==================================================
-          DELIVERY PACKAGE & GIFT BOX
-          ================================================== */}
-      <section id="gift" className="py-10 md:py-14 bg-[#F8FAFC] border-t border-slate-200/80 scroll-mt-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Main Card Box */}
-          <div className="p-6 sm:p-10 md:p-12 rounded-3xl light-card border-sky-200 shadow-xl relative overflow-hidden bg-white">
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-
-              {/* Left Side: Gift & Self Purchase Story + Pricing + CTA */}
-              <div className="lg:col-span-7 text-center lg:text-left">
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-[#0284C7] text-xs font-bold uppercase tracking-wider mb-4 sm:mb-4.5">
-                  <LuGift size={14} />
-                  <span>উপহারের জন্য চমৎকার পছন্দ</span>
-                </div>
-
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0F172A] mb-3 tracking-tight leading-snug">
-                  নিজের জন্য, কিংবা প্রিয় কারও জন্য
-                </h3>
-
-                <p className="text-sm sm:text-base md:text-lg text-[#475569] max-w-xl mx-auto lg:mx-0 mb-6 leading-relaxed font-normal">
-                  বিশেষ কাউকে খুশি করতে সবসময় বড় কিছু প্রয়োজন হয় না। আলোর প্রতিফলনে রঙ বদলানো একটি সুন্দর ও স্টাইলিশ ঘড়িও হতে পারে মনে রাখার মতো একটি সেরা উপহার।
-                </p>
-
-                {/* Action CTA */}
-                <div>
-                  <button
-                    onClick={() => scrollToSection('order-form')}
-                    className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-extrabold text-base sm:text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                  >
-                    <LuGift size={21} />
-                    <span>উপহার দিতে অর্ডার করুন</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Side: Delivery Package List Box */}
-              <div className="lg:col-span-5">
-                <div className="p-6 sm:p-7 rounded-2xl bg-slate-50 border-2 border-sky-200 shadow-md flex flex-col justify-between text-left">
-
-                  {/* Header */}
-                  <div className="flex items-center gap-2.5 pb-4 border-b border-slate-200 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0">
-                      <LuPackageCheck size={22} />
-                    </div>
-                    <div>
-                      <h4 className="text-lg sm:text-xl font-bold text-[#0F172A]">
-                        ডেলিভারিতে যা যা পাচ্ছেনঃ
-                      </h4>
-                      <p className="text-xs text-[#64748B]">অরিজিনাল প্যাকেজ বক্স সেট</p>
-                    </div>
-                  </div>
-
-                  {/* List Items */}
-                  <ul className="space-y-3 mb-5">
-                    <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
-                      <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
-                      <span className="text-sm sm:text-base font-bold text-[#0F172A]">
-                        চার্লস ডেলন কালার চেঞ্জিং ওয়াচ
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
-                      <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
-                      <span className="text-sm sm:text-base font-bold text-[#0F172A]">
-                        আকর্ষণীয় অফিশিয়াল বক্স প্যাকেজিং
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
-                      <LuCircleCheck className="text-[#0284C7] shrink-0" size={19} />
-                      <span className="text-sm sm:text-base font-bold text-[#0F172A]">
-                        নিরাপদ বাবল র‍্যাপ ডেলিভারি
-                      </span>
-                    </li>
-                  </ul>
-
-                  {/* Note box */}
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center text-xs sm:text-sm text-emerald-800 font-bold flex items-center justify-center gap-2">
-                    <LuShieldCheck size={17} className="text-emerald-600 shrink-0" />
-                    <span>note: পণ্য হাতে পেয়ে টাকা দিবেন</span>
-                  </div>
-
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-
-      {/* ==================================================
           ORDER FORM SECTION
           ================================================== */}
       <section id="order-form" className="py-10 sm:py-16 md:py-24 border-t border-slate-200/80 bg-white scroll-mt-10 relative overflow-hidden">
@@ -823,8 +887,8 @@ export default function LandingPage() {
                   value={orderForm.name}
                   onChange={(e) => setOrderForm({ ...orderForm, name: e.target.value })}
                   className={`w-full px-3.5 py-2.5 sm:py-3.5 rounded-xl bg-white border ${formErrors.name
-                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                      : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
+                    ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                    : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
                     } text-[#0F172A] placeholder-slate-400 outline-none transition-all text-sm sm:text-base font-bn`}
                 />
                 {formErrors.name && (
@@ -846,8 +910,8 @@ export default function LandingPage() {
                   value={orderForm.phone}
                   onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })}
                   className={`w-full px-3.5 py-2.5 sm:py-3.5 rounded-xl bg-white border ${formErrors.phone
-                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                      : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
+                    ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                    : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
                     } text-[#0F172A] placeholder-slate-400 outline-none transition-all text-sm sm:text-base font-en`}
                 />
                 {formErrors.phone && (
@@ -869,76 +933,13 @@ export default function LandingPage() {
                   value={orderForm.address}
                   onChange={(e) => setOrderForm({ ...orderForm, address: e.target.value })}
                   className={`w-full px-3.5 py-2.5 sm:py-3.5 rounded-xl bg-white border ${formErrors.address
-                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                      : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
+                    ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                    : 'border-slate-200 focus:border-[#0284C7] focus:ring-2 focus:ring-sky-100'
                     } text-[#0F172A] placeholder-slate-400 outline-none transition-all text-sm sm:text-base resize-none font-bn`}
                 />
                 {formErrors.address && (
                   <p className="text-xs text-red-500 font-medium mt-1">{formErrors.address}</p>
                 )}
-              </div>
-
-              {/* Color Variant Radio Select (3 Colors) */}
-              <div>
-                <label className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-1.5 sm:gap-2">
-                  <LuPalette className="text-[#0284C7]" size={16} />
-                  <span>পছন্দের কালার নির্বাচন করুন</span>
-                </label>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
-                  {/* Black */}
-                  <label className={`p-2 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('ব্ল্যাক')
-                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-white border-slate-200 text-[#475569]'
-                    }`}>
-                    <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-                      <input
-                        type="radio"
-                        name="colorVariant"
-                        checked={orderForm.variant.includes('ব্ল্যাক')}
-                        onChange={() => setOrderForm({ ...orderForm, variant: 'ব্ল্যাক (Black)' })}
-                        className="accent-[#0284C7] shrink-0"
-                      />
-                      <span className="font-semibold text-xs sm:text-sm truncate">ব্ল্যাক</span>
-                    </div>
-                    <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-slate-900 border border-white shrink-0 ml-1" />
-                  </label>
-
-                  {/* Blue */}
-                  <label className={`p-2 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('ব্লু')
-                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-white border-slate-200 text-[#475569]'
-                    }`}>
-                    <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-                      <input
-                        type="radio"
-                        name="colorVariant"
-                        checked={orderForm.variant.includes('ব্লু')}
-                        onChange={() => setOrderForm({ ...orderForm, variant: 'ব্লু (Blue)' })}
-                        className="accent-[#0284C7] shrink-0"
-                      />
-                      <span className="font-semibold text-xs sm:text-sm truncate">ব্লু</span>
-                    </div>
-                    <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-blue-600 border border-white shrink-0 ml-1" />
-                  </label>
-
-                  {/* Gray */}
-                  <label className={`p-2 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.variant.includes('গ্রে')
-                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-white border-slate-200 text-[#475569]'
-                    }`}>
-                    <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-                      <input
-                        type="radio"
-                        name="colorVariant"
-                        checked={orderForm.variant.includes('গ্রে')}
-                        onChange={() => setOrderForm({ ...orderForm, variant: 'গ্রে (Gray)' })}
-                        className="accent-[#0284C7] shrink-0"
-                      />
-                      <span className="font-semibold text-xs sm:text-sm truncate">গ্রে</span>
-                    </div>
-                    <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-slate-500 border border-white shrink-0 ml-1" />
-                  </label>
-                </div>
               </div>
 
               {/* Quantity Selector */}
@@ -951,7 +952,7 @@ export default function LandingPage() {
                   <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-50 p-1 sm:p-1.5 rounded-lg sm:rounded-xl border border-slate-200 shadow-xs">
                     <button
                       type="button"
-                      onClick={() => setOrderForm({ ...orderForm, quantity: Math.max(1, orderForm.quantity - 1) })}
+                      onClick={() => handleQuantityChange(orderForm.quantity - 1)}
                       disabled={orderForm.quantity <= 1}
                       className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-white hover:bg-sky-100 text-[#0284C7] disabled:opacity-30 disabled:hover:bg-white disabled:cursor-not-allowed transition-all cursor-pointer active:scale-95 shadow-2xs"
                       aria-label="পরিমাণ কমান"
@@ -965,7 +966,7 @@ export default function LandingPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setOrderForm({ ...orderForm, quantity: orderForm.quantity + 1 })}
+                      onClick={() => handleQuantityChange(orderForm.quantity + 1)}
                       className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-white hover:bg-sky-100 text-[#0284C7] transition-all cursor-pointer active:scale-95 shadow-2xs"
                       aria-label="পরিমাণ বাড়ান"
                     >
@@ -982,46 +983,70 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Delivery Zone Selector */}
-              <div>
-                <label className="block text-xs sm:text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-1.5 sm:gap-2">
-                  <LuTruck className="text-[#0284C7]" size={16} />
-                  <span>ডেলিভারি এলাকা নির্বাচন করুন</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_outside'
-                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-white border-slate-200 text-[#475569]'
-                    }`}>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <input
-                        type="radio"
-                        name="deliveryZone"
-                        checked={orderForm.deliveryZone === 'dhaka_outside'}
-                        onChange={() => setOrderForm({ ...orderForm, deliveryZone: 'dhaka_outside' })}
-                        className="accent-[#0284C7]"
-                      />
-                      <span className="font-semibold text-xs sm:text-sm">ঢাকা সিটির বাইরে</span>
-                    </div>
-                    <span className="font-num font-bold text-xs sm:text-sm text-[#0284C7]">৳ ১৩০</span>
-                  </label>
+              {/* Dynamic Color Variant Selectors (Adapts to Quantity: 1, 2, 3...) */}
+              <div className="space-y-3 sm:space-y-4">
+                {orderForm.selectedColors.map((selectedColor, watchIndex) => {
+                  const isMulti = orderForm.quantity > 1;
+                  const labelTitle = isMulti
+                    ? `${getOrdinalBangla(watchIndex)} ঘড়ির কালার নির্বাচন করুন`
+                    : 'পছন্দের কালার নির্বাচন করুন';
 
-                  <label className={`p-2.5 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${orderForm.deliveryZone === 'dhaka_inside'
-                    ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
-                    : 'bg-white border-slate-200 text-[#475569]'
-                    }`}>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <input
-                        type="radio"
-                        name="deliveryZone"
-                        checked={orderForm.deliveryZone === 'dhaka_inside'}
-                        onChange={() => setOrderForm({ ...orderForm, deliveryZone: 'dhaka_inside' })}
-                        className="accent-[#0284C7]"
-                      />
-                      <span className="font-semibold text-xs sm:text-sm">ঢাকা সিটির ভিতরে</span>
+                  return (
+                    <div key={watchIndex} className="space-y-1.5 sm:space-y-2">
+                      <label className="block text-xs sm:text-sm font-bold text-[#0F172A] flex items-center gap-1.5 sm:gap-2">
+                        <LuPalette className="text-[#0284C7]" size={16} />
+                        <span>{labelTitle}</span>
+                        {isMulti && (
+                          <span className="text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-[#0284C7]">
+                            ঘড়ি #{toBanglaNum(watchIndex + 1)}
+                          </span>
+                        )}
+                      </label>
+                      <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
+                        {COLOR_OPTIONS.map((opt) => {
+                          const isSelected = selectedColor === opt.fullName;
+                          return (
+                            <label
+                              key={opt.id}
+                              className={`p-2 sm:p-3.5 rounded-xl border-2 flex items-center justify-between cursor-pointer transition-all ${isSelected
+                                ? 'bg-sky-50 border-[#0284C7] text-[#0F172A] shadow-xs'
+                                : 'bg-white border-slate-200 text-[#475569]'
+                                }`}
+                            >
+                              <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+                                <input
+                                  type="radio"
+                                  name={`colorVariant_${watchIndex}`}
+                                  checked={isSelected}
+                                  onChange={() => handleColorChange(watchIndex, opt.fullName)}
+                                  className="accent-[#0284C7] shrink-0"
+                                />
+                                <span className="font-semibold text-xs sm:text-sm truncate">{opt.label}</span>
+                              </div>
+                              <div className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full ${opt.dotBg} border border-white shrink-0 ml-1`} />
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <span className="font-num font-bold text-xs sm:text-sm text-[#0284C7]">৳ ৭০</span>
-                  </label>
+                  );
+                })}
+              </div>
+
+              {/* Delivery Charge Info */}
+              <div className="!mt-2 sm:!mt-6 px-3.5 py-2 sm:p-4 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-sky-100 text-[#0284C7] flex items-center justify-center shrink-0">
+                    <LuTruck className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#0284C7]" />
+                  </div>
+                  <span className="text-sm sm:text-base md:text-lg font-bold text-[#0F172A]">
+                    সারা দেশে ডেলিভারি চার্জ
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="font-num font-black text-base sm:text-xl text-[#0284C7]">
+                    ৳ ১০০
+                  </span>
                 </div>
               </div>
 
@@ -1040,11 +1065,6 @@ export default function LandingPage() {
                 <div className="flex justify-between text-[#475569]">
                   <span>ডেলিভারি চার্জ</span>
                   <span className="font-num text-[#0F172A] font-bold">৳ {deliveryCharge.toLocaleString('bn-BD')}</span>
-                </div>
-
-                <div className="flex justify-between text-emerald-600 text-xs sm:text-sm font-bold">
-                  <span>মোট সাশ্রয়</span>
-                  <span className="font-num">- ৳ {totalSavings.toLocaleString('bn-BD')}</span>
                 </div>
 
                 <div className="flex justify-between text-sm sm:text-lg font-black text-[#0F172A] pt-2 sm:pt-2.5 border-t border-slate-200">
@@ -1149,7 +1169,7 @@ export default function LandingPage() {
             <span className="text-[#0284C7]">আপনার লুক হোক আলাদা</span>
           </h2>
           <p className="text-base sm:text-lg text-[#475569] max-w-xl mx-auto mb-6 font-normal">
-            আলোর প্রতিফলনে বদলে যাওয়া আকর্ষণীয় ডায়াল—আপনার প্রতিদিনের স্টাইলে যোগ করুক নতুন মাত্রা।
+            কাঁটা ঘোরার সাথে বদলে যাওয়া আকর্ষণীয় ডায়াল—আপনার প্রতিদিনের স্টাইলে যোগ করুক নতুন মাত্রা।
           </p>
           <div className="small-design-line" />
           <button
@@ -1239,14 +1259,14 @@ export default function LandingPage() {
           ================================================== */}
       <div
         className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 border-t border-slate-200 backdrop-blur-xl px-4 py-3 safe-bottom shadow-[0_-8px_25px_rgba(0,0,0,0.08)] transition-all duration-300 ease-in-out ${showMobileFloatingBar
-            ? 'translate-y-0 opacity-100 pointer-events-auto'
-            : 'translate-y-full opacity-0 pointer-events-none'
+          ? 'translate-y-0 opacity-100 pointer-events-auto'
+          : 'translate-y-full opacity-0 pointer-events-none'
           }`}
       >
         <div className="flex items-center justify-between gap-3">
           <div>
-            <span className="text-[10px] font-bold text-emerald-600 block">৪০০ টাকা ছাড়</span>
-            <span className="font-num text-xl font-black text-[#0284C7]">৳ ৮৯০</span>
+            <span className="text-[10px] font-bold text-emerald-600 block">৪৫০ টাকা ছাড়</span>
+            <span className="font-num text-xl font-black text-[#0284C7]">৳ ৮৪০</span>
           </div>
           <button
             onClick={() => scrollToSection('order-form')}

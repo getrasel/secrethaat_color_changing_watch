@@ -7,11 +7,12 @@ import type { ProductColor } from '../types';
 export const PRODUCT_INFO = {
   name: "Charles Delon Color-Changing Dial Watch",
   nameBangla: "চার্লস ডেলন কালার চেঞ্জিং ডায়াল ওয়াচ",
-  tagline: "আলো পড়লেই রঙ বদলায়! সাধারণ ঘড়ির ভিড়ে আপনার লুক হোক আলাদা",
+  tagline: "কাঁটা ঘোরলেই রঙ বদলায়! সাধারণ ঘড়ির ভিড়ে আপনার লুক হোক আলাদা",
   regularPrice: 1290,
-  basePrice: 890,
-  deliveryDhaka: 70,
-  deliveryOutside: 130,
+  basePrice: 840,
+  deliveryCharge: 100,
+  deliveryDhaka: 100,
+  deliveryOutside: 100,
 };
 
 export const COLOR_VARIANTS: ProductColor[] = [

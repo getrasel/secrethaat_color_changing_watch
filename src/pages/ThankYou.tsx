@@ -34,17 +34,11 @@ export const ThankYou: React.FC = () => {
   const orderNumber = state?.orderNumber || fallbackOrderNumber;
 
   const order = state?.order;
-  const isOutside =
-    order?.deliveryArea === "outside" ||
-    order?.deliveryArea === "dhaka_outside" ||
-    state?.deliveryFee === PRODUCT_INFO.deliveryOutside;
+  const deliveryFee =
+    state?.deliveryFee ?? PRODUCT_INFO.deliveryCharge;
   const grandTotal =
     state?.grandTotal ??
-    PRODUCT_INFO.basePrice +
-      (isOutside ? PRODUCT_INFO.deliveryOutside : PRODUCT_INFO.deliveryDhaka);
-  const deliveryFee =
-    state?.deliveryFee ??
-    (isOutside ? PRODUCT_INFO.deliveryOutside : PRODUCT_INFO.deliveryDhaka);
+    PRODUCT_INFO.basePrice * (order?.quantity ?? 1) + deliveryFee;
   const quantity = order?.quantity ?? 1;
   const unitPrice = PRODUCT_INFO.basePrice;
   const subtotal = state?.subtotal ?? unitPrice * quantity;
@@ -200,13 +194,7 @@ export const ThankYou: React.FC = () => {
                 </span>
               </div>
               <div className="flex justify-between items-center gap-2 text-slate-600">
-                <span>
-                  ডেলিভারি চার্জ (
-                  {isOutside
-                    ? "ঢাকার বাইরে"
-                    : "ঢাকা ভেতরে"}
-                  ):
-                </span>
+                <span>ডেলিভারি চার্জ (সারা দেশে):</span>
                 <span className="font-semibold text-slate-900 shrink-0 font-number">
                   ৳{toBanglaNumber(deliveryFee)}
                 </span>
